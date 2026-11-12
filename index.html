@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NAI - Next Generation AI Studio</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                    },
+                    colors: {
+                        nai: {
+                            50: '#f0fdf4',
+                            500: '#10b981',
+                            600: '#059669',
+                            900: '#064e3b',
+                            accent: '#6366f1',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .light .glass-panel {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(0, 0, 0, 0.12);
+        }
+        .glow-effect {
+            box-shadow: 0 0 25px -5px rgba(16, 185, 129, 0.3);
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 5px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(148, 163, 184, 0.2);
+            border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: rgba(148, 163, 184, 0.4);
+        }
+
+        /* Direct rule overrides for Light Mode Text Contrast */
+        .light body {
+            background-color: #f8fafc !important;
+            color: #0f172a !important;
+        }
+        .light main {
+            background-color: #f1f5f9 !important;
+        }
+        .light .chat-assistant-bubble {
+            background-color: #ffffff !important;
+            color: #0f172a !important;
+            border: 1px solid #cbd5e1 !important;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+        .light .chat-assistant-bubble p, 
+        .light .chat-assistant-bubble span, 
+        .light .chat-assistant-bubble div,
+        .light .chat-assistant-bubble li,
+        .light .chat-assistant-bubble strong {
+            color: #0f172a !important;
+        }
+        .light .chat-user-bubble {
+            background: linear-gradient(135deg, #059669 0%, #10b981 100%) !important;
+            color: #ffffff !important;
+        }
+        .light .code-block-header {
+            background-color: #e2e8f0 !important;
+            color: #334155 !important;
+            border-bottom: 1px solid #cbd5e1 !important;
+        }
+        .light .code-block-body {
+            background-color: #f8fafc !important;
+            color: #0f172a !important;
+        }
+    </style>
+</head>
+<body class="bg-slate-950 dark:bg-slate-950 light:bg-slate-50 text-slate-100 dark:text-slate-100 light:text-slate-900 transition-colors duration-300 min-h-screen flex flex-col antialiased selection:bg-emerald-500/30 selection:text-emerald-400">
+    
+    <!-- Background Gradient Spheres -->
+    <div class="fixed top-0 left-1/4 w-96 h-96 bg-emerald-500/10 rounded-full filter blur-[120px] pointer-events-none"></div>
+    <div class="fixed bottom-0 right-1/4 w-96 h-96 bg-indigo-500/10 rounded-full filter blur-[120px] pointer-events-none"></div>
+
+    <div class="flex h-screen overflow-hidden relative z-10">
+        <!-- Sidebar -->
+        <aside id="sidebar" class="fixed md:relative inset-y-0 left-0 z-40 w-72 glass-panel flex-shrink-0 flex flex-col justify-between -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out">
+            <div>
+                <!-- Brand Header -->
+                <div class="p-5 flex items-center justify-between border-b border-white/5 dark:border-white/5 light:border-slate-200">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 rounded-2xl bg-emerald-400 flex items-center justify-center shadow-lg shadow-emerald-500/20 text-slate-950">
+                            <i class="fa-solid fa-brain text-xl text-slate-950"></i>
+                        </div>
+                        <div>
+                            <h1 class="font-bold text-lg tracking-tight bg-gradient-to-r from-emerald-400 via-emerald-500 to-indigo-500 bg-clip-text text-transparent">NAI</h1>
+                            <span class="text-[10px] font-semibold text-emerald-400 uppercase tracking-wider">Intelligence AI</span>
+                        </div>
+                    </div>
+                    <!-- Close button for mobile -->
+                    <button type="button" onclick="closeSidebar()" class="md:hidden text-slate-400 hover:text-slate-200 p-2 rounded-xl hover:bg-white/10 transition-colors flex items-center justify-center">
+                        <i class="fa-solid fa-xmark text-xl"></i>
+                    </button>
+                </div>
+
+                <!-- Action Button -->
+                <div class="p-4">
+                    <button onclick="createNewChat()" class="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-slate-950 font-bold text-sm shadow-lg shadow-emerald-500/20 flex items-center justify-center space-x-2 transition-all hover:scale-[1.02] active:scale-[0.98]">
+                        <i class="fa-solid fa-plus text-xs"></i>
+                        <span>Nueva conversación</span>
+                    </button>
+                </div>
+
+                <!-- Chat List -->
+                <div class="px-3 py-2">
+                    <div class="text-[11px] font-semibold text-slate-400 dark:text-slate-400 light:text-slate-500 px-3 mb-2 uppercase tracking-wider">Historial</div>
+                    <div id="chat-history" class="space-y-1 max-h-[calc(100vh-280px)] overflow-y-auto custom-scrollbar">
+                        <!-- Items se cargan dinámicamente -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer status -->
+            <div class="p-4 border-t border-white/5 dark:border-white/5 light:border-slate-200 space-y-2">
+                <button onclick="toggleTheme()" class="w-full py-2.5 px-3 rounded-xl bg-white/5 dark:bg-white/5 light:bg-slate-200/60 hover:bg-white/10 dark:hover:bg-white/10 light:hover:bg-slate-300/60 text-slate-300 dark:text-slate-300 light:text-slate-700 text-xs font-semibold flex items-center justify-between transition-all">
+                    <span class="flex items-center space-x-2">
+                        <i id="theme-icon" class="fa-solid fa-moon text-emerald-400"></i>
+                        <span id="theme-text">Modo Oscuro</span>
+                    </span>
+                    <i class="fa-solid fa-circle-half-stroke text-[10px] text-slate-400"></i>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="flex-1 flex flex-col h-full relative overflow-hidden bg-slate-950/50 dark:bg-slate-950/50 light:bg-slate-100/50">
+            <!-- Top Navbar -->
+            <header class="h-16 border-b border-white/5 dark:border-white/5 light:border-slate-200 glass-panel flex items-center justify-between px-5 z-20">
+                <div class="flex items-center space-x-3">
+                    <button type="button" onclick="openSidebar()" class="md:hidden text-slate-400 hover:text-emerald-400 p-2 rounded-xl hover:bg-white/10 transition-colors flex items-center justify-center">
+                        <i class="fa-solid fa-bars text-xl"></i>
+                    </button>
+                    
+                    <!-- Model Router Selector -->
+                    <div class="relative group">
+                        <select id="model-select" onchange="changeModel(this.value)" class="bg-slate-900/90 dark:bg-slate-900/90 light:bg-slate-200 text-slate-200 dark:text-slate-200 light:text-slate-800 text-xs font-medium rounded-xl px-3 py-2 pr-8 border border-white/10 dark:border-white/10 light:border-slate-300 focus:outline-none focus:border-emerald-500/50 appearance-none cursor-pointer hover:bg-slate-800 dark:hover:bg-slate-800 light:hover:bg-slate-300 transition-all shadow-inner">
+                            <option value="auto">⚡ Auto (Enrutador IA)</option>
+                            <option value="gemini-3.6">Gemini 3.6 Flash</option>
+                            <option value="gemini-3.5">Gemini 3.5 Flash-Lite</option>
+                            <option value="gemini-3">Gemini 3 Flash</option>
+                            <option value="nano-banana">🎨 Nano Banana (Imagen)</option>
+                        </select>
+                        <i class="fa-solid fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-slate-400 pointer-events-none"></i>
+                    </div>
+
+                    <div id="routed-badge" class="hidden sm:inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[11px] font-semibold">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                        <span id="routed-model-name">Router Activo</span>
+                    </div>
+                </div>
+
+                <!-- Theme Toggle Quick Button -->
+                <div class="flex items-center space-x-2">
+                    <button onclick="toggleTheme()" class="p-2 rounded-xl text-slate-400 hover:text-emerald-400 hover:bg-white/5 transition-all" title="Cambiar tema">
+                        <i id="header-theme-icon" class="fa-solid fa-moon text-base"></i>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Chat Scroll Area -->
+            <div id="chat-container" class="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6 custom-scrollbar">
+                <!-- Mensajes iniciales o dinámicos -->
+            </div>
+
+            <!-- Input Container -->
+            <div class="p-4 sm:p-6 glass-panel border-t border-white/5 dark:border-white/5 light:border-slate-200 relative z-20">
+                <div class="max-w-4xl mx-auto">
+                    <div class="relative flex items-center bg-slate-900/80 dark:bg-slate-900/80 light:bg-slate-200 rounded-2xl border border-white/10 dark:border-white/10 light:border-slate-300 focus-within:border-emerald-500/50 focus-within:ring-1 focus-within:ring-emerald-500/30 transition-all shadow-2xl overflow-hidden">
+                        <textarea 
+                            id="user-input" 
+                            rows="1" 
+                            placeholder="Escribe tu mensaje o solicita crear texto, código o imágenes..." 
+                            onkeydown="handleKeyDown(event)"
+                            oninput="autoResize(this)"
+                            class="w-full bg-transparent text-slate-100 dark:text-slate-100 light:text-slate-900 placeholder-slate-500 rounded-2xl pl-4 pr-14 py-4 text-sm focus:outline-none resize-none max-h-40 custom-scrollbar"
+                        ></textarea>
+                        
+                        <button 
+                            type="button" 
+                            id="send-btn"
+                            onclick="handleChatSubmit()"
+                            class="absolute right-2.5 bottom-2.5 w-10 h-10 bg-gradient-to-tr from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-slate-950 font-bold rounded-xl flex items-center justify-center transition-all shadow-md hover:scale-105 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed"
+                        >
+                            <i class="fa-solid fa-arrow-up text-sm"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="flex items-center justify-between mt-2.5 px-2">
+                        <span class="text-[11px] text-slate-500 dark:text-slate-500 light:text-slate-600">NAI - Auto Enrutamiento Inteligente</span>
+                        <span class="text-[11px] text-slate-500 dark:text-slate-500 light:text-slate-600">Respuestas rápidas sin recargas</span>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Toast Component -->
+    <div id="toast" class="fixed bottom-24 left-1/2 transform -translate-x-1/2 glass-panel text-slate-200 dark:text-slate-200 light:text-slate-800 px-4 py-2.5 rounded-xl text-xs font-medium shadow-2xl opacity-0 pointer-events-none transition-all duration-300 z-50 flex items-center space-x-2 border border-emerald-500/30">
+        <i class="fa-solid fa-circle-check text-emerald-400"></i>
+        <span id="toast-text">Copiado al portapapeles</span>
+    </div>
+
+    <script> 
+        let currentModel = 'auto';
+        let conversations = loadSavedConversations();
+        let activeChatId = conversations.length > 0 ? conversations[0].id : createNewChatState();
+        let isProcessing = false;
+
+        function getApiKey() {
+            return FIXED_API_KEY;
+        }
+
+        function loadSavedConversations() {
+            try {
+                const saved = localStorage.getItem('nai_conversations');
+                if (saved) return JSON.parse(saved);
+            } catch (e) {
+                console.error("Error cargando conversaciones guardadas:", e);
+            }
+            return [];
+        }
+
+        function toggleTheme() {
+            const html = document.documentElement;
+            const isDark = html.classList.contains('dark');
+            setTheme(!isDark);
+        }
+
+        function setTheme(isDark) {
+            const html = document.documentElement;
+            const themeIcon = document.getElementById('theme-icon');
+            const headerThemeIcon = document.getElementById('header-theme-icon');
+            const themeText = document.getElementById('theme-text');
+
+            if (isDark) {
+                html.classList.add('dark');
+                html.classList.remove('light');
+                localStorage.setItem('nai_theme', 'dark');
+                if (themeIcon) themeIcon.className = 'fa-solid fa-moon text-emerald-400';
+                if (headerThemeIcon) headerThemeIcon.className = 'fa-solid fa-moon text-emerald-400';
+                if (themeText) themeText.innerText = 'Modo Oscuro';
+            } else {
+                html.classList.remove('dark');
+                html.classList.add('light');
+                localStorage.setItem('nai_theme', 'light');
+                if (themeIcon) themeIcon.className = 'fa-solid fa-sun text-amber-500';
+                if (headerThemeIcon) headerThemeIcon.className = 'fa-solid fa-sun text-amber-500';
+                if (themeText) themeText.innerText = 'Modo Claro';
+            }
+        }
+
+        function initTheme() {
+            const savedTheme = localStorage.getItem('nai_theme') || 'dark';
+            setTheme(savedTheme === 'dark');
+        }
+
+        function createNewChatState() {
+            const id = 'chat_' + Date.now();
+            const newChat = {
+                id: id,
+                title: 'Nueva conversación',
+                messages: [
+                    {
+                        role: 'assistant',
+                        text: '¡Hola! Soy **NAI**. ¿En qué puedo ayudarte hoy? Puedo resolver tus dudas, ayudarte con programación o generar imágenes.',
+                        modelUsed: 'Gemini 3 Flash'
+                    }
+                ]
+            };
+            conversations.unshift(newChat);
+            saveConversations();
+            return id;
+        }
+
+        function saveConversations() {
+            try {
+                localStorage.setItem('nai_conversations', JSON.stringify(conversations));
+            } catch (e) {
+                console.error("Error al guardar conversaciones:", e);
+            }
+        }
+
+        function getActiveChat() {
+            return conversations.find(c => c.id === activeChatId) || conversations[0];
+        }
+
+        function createNewChat() {
+            activeChatId = createNewChatState();
+            renderHistory();
+            renderMessages();
+            closeSidebar();
+        }
+
+        function selectChat(id) {
+            activeChatId = id;
+            renderHistory();
+            renderMessages();
+            closeSidebar();
+        }
+
+        function deleteChat(id, e) {
+            e.stopPropagation();
+            conversations = conversations.filter(c => c.id !== id);
+            if (conversations.length === 0) {
+                activeChatId = createNewChatState();
+            } else if (activeChatId === id) {
+                activeChatId = conversations[0].id;
+            }
+            saveConversations();
+            renderHistory();
+            renderMessages();
+        }
+
+        function openSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            if (sidebar) sidebar.classList.remove('-translate-x-full');
+        }
+
+        function closeSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            if (sidebar) sidebar.classList.add('-translate-x-full');
+        }
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            if (sidebar) sidebar.classList.toggle('-translate-x-full');
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            return text
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        function renderHistory() {
+            const container = document.getElementById('chat-history');
+            if (!container) return;
+            container.innerHTML = conversations.map(c => `
+                <div onclick="selectChat('${c.id}')" class="group flex items-center justify-between p-2.5 rounded-xl cursor-pointer transition-all ${c.id === activeChatId ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30' : 'text-slate-400 dark:text-slate-400 light:text-slate-600 hover:bg-white/5 dark:hover:bg-white/5 light:hover:bg-slate-200 hover:text-slate-200 dark:hover:text-slate-200 light:hover:text-slate-900'}">
+                    <div class="flex items-center space-x-2.5 overflow-hidden">
+                        <i class="fa-regular fa-message text-xs"></i>
+                        <span class="text-xs font-medium truncate w-40">${escapeHtml(c.title)}</span>
+                    </div>
+                    <button onclick="deleteChat('${c.id}', event)" class="opacity-0 group-hover:opacity-100 hover:text-rose-400 p-1 transition-opacity">
+                        <i class="fa-solid fa-trash-can text-xs"></i>
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function formatContent(text) {
+            if (!text) return '';
+
+            let cleanText = text
+                .replace(/<br\s*\/?>/gi, '\n')
+                .replace(/\/<em>/gi, '/*')
+                .replace(/<\/em>\//gi, '*/');
+            
+            if (cleanText.includes('<img') && !cleanText.includes('```')) {
+                return cleanText;
+            }
+
+            if ((cleanText.includes('<!DOCTYPE html>') || cleanText.includes('<html')) && !cleanText.includes('```')) {
+                cleanText = "```html\n" + cleanText.trim() + "\n```";
+            }
+
+            let blockIndex = 0;
+            let formatted = cleanText.replace(/```(\w+)?\n([\s\S]*?)```/g, (match, lang, code) => {
+                blockIndex++;
+                const cleanCode = code
+                    .replace(/<br\s*\/?>/gi, '\n')
+                    .replace(/\/<em>/gi, '/*')
+                    .replace(/<\/em>\//gi, '*/')
+                    .trim();
+
+                const language = (lang || 'code').toLowerCase();
+                const isHtml = language === 'html' || cleanCode.includes('<!DOCTYPE html>') || cleanCode.includes('<html');
+                const codeId = `code_block_${Date.now()}_${blockIndex}`;
+
+                return `
+                <div class="my-4 rounded-xl overflow-hidden bg-slate-900 dark:bg-slate-900 light:bg-slate-100 border border-white/10 dark:border-white/10 light:border-slate-300 shadow-xl font-sans w-full">
+                    <div class="code-block-header bg-slate-950 dark:bg-slate-950 light:bg-slate-200 px-3 py-2 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 border-b border-white/10 dark:border-white/10 light:border-slate-300">
+                        <div class="flex items-center justify-between sm:justify-start">
+                            <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-400 dark:text-emerald-400 light:text-slate-700 bg-emerald-500/10 px-2.5 py-1 rounded-md border border-emerald-500/20">${escapeHtml(language)}</span>
+                        </div>
+
+                        <div class="grid grid-cols-3 sm:flex items-center gap-1.5 w-full sm:w-auto">
+                            ${isHtml ? `
+                            <button type="button" onclick="switchCodeTab('${codeId}', 'preview')" id="btn_preview_${codeId}" class="px-2.5 py-1.5 text-[11px] sm:text-xs font-semibold rounded-lg bg-emerald-500 text-slate-950 shadow transition-all flex items-center justify-center space-x-1">
+                                <i class="fa-solid fa-eye text-[11px]"></i>
+                                <span class="truncate">Ver web</span>
+                            </button>
+                            ` : ''}
+
+                            <button type="button" onclick="switchCodeTab('${codeId}', 'code')" id="btn_code_${codeId}" class="px-2.5 py-1.5 text-[11px] sm:text-xs font-semibold rounded-lg ${isHtml ? 'bg-white/5 dark:bg-white/5 light:bg-slate-300/80 text-slate-300 dark:text-slate-300 light:text-slate-800 hover:bg-white/10' : 'bg-emerald-500 text-slate-950'} transition-all flex items-center justify-center space-x-1">
+                                <i class="fa-solid fa-code text-[11px]"></i>
+                                <span class="truncate">Código</span>
+                            </button>
+
+                            <button type="button" onclick="copyCodeFromBlock('${codeId}')" class="px-2.5 py-1.5 text-[11px] sm:text-xs font-semibold rounded-lg bg-white/5 dark:bg-white/5 light:bg-slate-300/80 text-slate-300 dark:text-slate-300 light:text-slate-800 hover:bg-emerald-500 hover:text-slate-950 transition-all flex items-center justify-center space-x-1">
+                                <i class="fa-regular fa-copy text-[11px]"></i>
+                                <span class="truncate">Copiar</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <textarea id="raw_${codeId}" class="hidden">${escapeHtml(cleanCode)}</textarea>
+
+                    ${isHtml ? `
+                    <div id="view_preview_${codeId}" class="p-1 sm:p-2 bg-slate-950/40 w-full">
+                        <iframe id="iframe_${codeId}" class="w-full h-[450px] min-h-[380px] rounded-lg border border-white/10 bg-white" sandbox="allow-scripts allow-same-origin allow-modals"></iframe>
+                    </div>
+                    ` : ''}
+
+                    <div id="view_code_${codeId}" class="${isHtml ? 'hidden' : ''} p-4 overflow-x-auto bg-slate-950 dark:bg-slate-950 light:bg-slate-900 text-emerald-300 font-mono text-xs max-h-96 custom-scrollbar">
+                        <pre><code>${escapeHtml(cleanCode)}</code></pre>
+                    </div>
+                </div>`;
+            });
+
+            formatted = formatted
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                .replace(/`([^`]+)`/g, '<code class="bg-slate-800 dark:bg-slate-800 light:bg-slate-200 text-emerald-400 dark:text-emerald-400 light:text-emerald-700 px-1.5 py-0.5 rounded text-xs font-mono">$1</code>')
+                .replace(/\n/g, '<br>');
+
+            return formatted;
+        }
+
+        function switchCodeTab(codeId, view) {
+            const previewView = document.getElementById(`view_preview_${codeId}`);
+            const codeView = document.getElementById(`view_code_${codeId}`);
+            const btnPreview = document.getElementById(`btn_preview_${codeId}`);
+            const btnCode = document.getElementById(`btn_code_${codeId}`);
+
+            if (view === 'preview') {
+                if (previewView) previewView.classList.remove('hidden');
+                if (codeView) codeView.classList.add('hidden');
+                
+                if (btnPreview) {
+                    btnPreview.className = "px-2.5 py-1.5 text-[11px] sm:text-xs font-semibold rounded-lg bg-emerald-500 text-slate-950 shadow transition-all flex items-center justify-center space-x-1";
+                }
+                if (btnCode) {
+                    btnCode.className = "px-2.5 py-1.5 text-[11px] sm:text-xs font-semibold rounded-lg bg-white/5 dark:bg-white/5 light:bg-slate-300/80 text-slate-300 dark:text-slate-300 light:text-slate-800 hover:bg-white/10 transition-all flex items-center justify-center space-x-1";
+                }
+
+                const iframe = document.getElementById(`iframe_${codeId}`);
+                const rawTextArea = document.getElementById(`raw_${codeId}`);
+                if (iframe && rawTextArea) {
+                    iframe.srcdoc = rawTextArea.value;
+                }
+            } else {
+                if (previewView) previewView.classList.add('hidden');
+                if (codeView) codeView.classList.remove('hidden');
+                
+                if (btnCode) {
+                    btnCode.className = "px-2.5 py-1.5 text-[11px] sm:text-xs font-semibold rounded-lg bg-emerald-500 text-slate-950 shadow transition-all flex items-center justify-center space-x-1";
+                }
+                if (btnPreview) {
+                    btnPreview.className = "px-2.5 py-1.5 text-[11px] sm:text-xs font-semibold rounded-lg bg-white/5 dark:bg-white/5 light:bg-slate-300/80 text-slate-300 dark:text-slate-300 light:text-slate-800 hover:bg-white/10 transition-all flex items-center justify-center space-x-1";
+                }
+            }
+        }
+
+        function initializeCodePreviews() {
+            document.querySelectorAll('[id^="iframe_"]').forEach(iframe => {
+                const codeId = iframe.id.replace('iframe_', '');
+                const rawTextArea = document.getElementById(`raw_${codeId}`);
+                if (rawTextArea && rawTextArea.value) {
+                    iframe.srcdoc = rawTextArea.value;
+                }
+            });
+        }
+
+        function copyCodeFromBlock(codeId) {
+            const rawTextArea = document.getElementById(`raw_${codeId}`);
+            if (!rawTextArea) return;
+
+            const textarea = document.createElement('textarea');
+            textarea.value = rawTextArea.value;
+            textarea.style.position = 'fixed';
+            textarea.style.opacity = '0';
+            document.body.appendChild(textarea);
+            textarea.focus();
+            textarea.select();
+
+            try {
+                const successful = document.execCommand('copy');
+                if (successful) {
+                    showToast("Código copiado al portapapeles");
+                } else {
+                    showToast("Error al copiar código");
+                }
+            } catch (err) {
+                console.error('Error al copiar:', err);
+                showToast("No se pudo copiar el código");
+            } finally {
+                document.body.removeChild(textarea);
+            }
+        }
+
+        function renderMessages() {
+            const chat = getActiveChat();
+            const container = document.getElementById('chat-container');
+            container.innerHTML = '';
+
+            chat.messages.forEach(msg => {
+                const msgDiv = document.createElement('div');
+                msgDiv.className = `flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'} animate-fade-in`;
+                
+                if (msg.role === 'user') {
+                    msgDiv.innerHTML = `
+                        <div class="chat-user-bubble max-w-[85%] sm:max-w-[70%] bg-gradient-to-tr from-emerald-600 to-emerald-500 text-slate-950 font-medium px-4 py-3 rounded-2xl shadow-lg rounded-tr-none text-sm">
+                            ${escapeHtml(msg.text)}
+                        </div>
+                    `;
+                } else {
+                    msgDiv.innerHTML = `
+                        <div class="flex space-x-3 max-w-[90%] sm:max-w-[80%]">
+                            <div class="w-8 h-8 rounded-xl bg-emerald-400 flex items-center justify-center flex-shrink-0 shadow-md text-slate-950">
+                                <i class="fa-solid fa-brain text-sm"></i>
+                            </div>
+                            <div class="space-y-1 w-full">
+                                ${msg.modelUsed ? `<div class="text-[10px] font-semibold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">${escapeHtml(msg.modelUsed)}</div>` : ''}
+                                <div class="chat-assistant-bubble glass-panel text-slate-200 dark:text-slate-200 light:text-slate-900 px-5 py-4 rounded-2xl rounded-tl-none text-sm space-y-3 leading-relaxed shadow-xl border border-white/5 dark:border-white/5 light:border-slate-300">
+                                    ${formatContent(msg.text)}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+                container.appendChild(msgDiv);
+            });
+
+            container.scrollTop = container.scrollHeight;
+            setTimeout(initializeCodePreviews, 50);
+        }
+
+        function handleKeyDown(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                handleChatSubmit();
+            }
+        }
+
+        function autoResize(textarea) {
+            textarea.style.height = 'auto';
+            textarea.style.height = Math.min(textarea.scrollHeight, 160) + 'px';
+        }
+
+        function changeModel(val) {
+            currentModel = val;
+            const badge = document.getElementById('routed-badge');
+            const nameSpan = document.getElementById('routed-model-name');
+            
+            if (val === 'auto') {
+                badge.classList.remove('hidden');
+                nameSpan.innerText = 'Router IA Activo';
+            } else {
+                badge.classList.remove('hidden');
+                nameSpan.innerText = val.toUpperCase();
+            }
+        }
+
+        async function detectIntentWithGemini3(userPrompt) {
+            const systemPrompt = "Intent classifier: IMAGE, CODE, GENERAL. Output JSON only.";
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${getApiKey()}`;
+
+            const payload = {
+                contents: [{ parts: [{ text: userPrompt }] }],
+                systemInstruction: { parts: [{ text: systemPrompt }] },
+                generationConfig: {
+                    maxOutputTokens: 20,
+                    temperature: 0.1,
+                    responseMimeType: "application/json",
+                    responseSchema: {
+                        type: "OBJECT",
+                        properties: {
+                            intent: { type: "STRING" }
+                        },
+                        required: ["intent"]
+                    }
+                }
+            };
+
+            try {
+                const res = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+                const jsonText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+                if (jsonText) {
+                    const parsed = JSON.parse(jsonText);
+                    return parsed.intent || 'GENERAL';
+                }
+            } catch (err) {
+                console.error("Router error:", err);
+            }
+            return 'GENERAL';
+        }
+
+        async function handleChatSubmit() {
+            if (isProcessing) return;
+
+            const inputEl = document.getElementById('user-input');
+            const prompt = inputEl.value.trim();
+            if (!prompt) return;
+
+            inputEl.value = '';
+            inputEl.style.height = 'auto';
+
+            const chat = getActiveChat();
+            if (chat.messages.length === 1 && chat.title === 'Nueva conversación') {
+                chat.title = prompt.slice(0, 30) + (prompt.length > 30 ? '...' : '');
+                renderHistory();
+            }
+
+            chat.messages.push({ role: 'user', text: prompt });
+            renderMessages();
+
+            isProcessing = true;
+            document.getElementById('send-btn').disabled = true;
+
+            const loadingMsg = { role: 'assistant', text: 'Analizando y procesando respuesta...', modelUsed: 'Pensando...' };
+            chat.messages.push(loadingMsg);
+            renderMessages();
+
+            try {
+                let targetIntent = 'GENERAL';
+                let selectedModelTag = 'Gemini 3 Flash';
+
+                if (currentModel === 'auto') {
+                    targetIntent = await detectIntentWithGemini3(prompt);
+                    document.getElementById('routed-model-name').innerText = `Auto: ${targetIntent}`;
+                } else if (currentModel === 'nano-banana') {
+                    targetIntent = 'IMAGE';
+                } else {
+                    selectedModelTag = currentModel;
+                }
+
+                if (targetIntent === 'IMAGE') {
+                    selectedModelTag = 'Nano Banana (Imagen)';
+                    await generateImageResponse(chat, prompt, selectedModelTag);
+                } else {
+                    if (currentModel === 'auto') {
+                        selectedModelTag = targetIntent === 'CODE' ? 'Gemini 3.6 Flash (Código)' : 'Gemini 3.5 Flash-Lite';
+                    }
+                    await generateTextResponse(chat, prompt, selectedModelTag);
+                }
+            } catch (error) {
+                console.error(error);
+                chat.messages[chat.messages.length - 1] = {
+                    role: 'assistant',
+                    text: '⚠️ Hubo un pequeño inconveniente al procesar la solicitud. Por favor intenta de nuevo en unos segundos.',
+                    modelUsed: 'Error'
+                };
+            } finally {
+                isProcessing = false;
+                document.getElementById('send-btn').disabled = false;
+                saveConversations();
+                renderMessages();
+            }
+        }
+
+        async function generateTextResponse(chat, prompt, modelTag) {
+            const key = getApiKey();
+            
+            // Mapeo preciso de modelos seleccionados al endpoint oficial correspondiente
+            let modelEndpointName = 'gemini-3-flash-preview'; // por defecto
+            if (currentModel === 'gemini-3.6') {
+                modelEndpointName = 'gemini-3.6-flash-preview';
+            } else if (currentModel === 'gemini-3.5') {
+                modelEndpointName = 'gemini-3.5-flash-preview';
+            } else if (currentModel === 'gemini-3') {
+                modelEndpointName = 'gemini-3-flash-preview';
+            }
+
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${modelEndpointName}:generateContent?key=${key}`;
+            
+            const payload = {
+                contents: [{ parts: [{ text: prompt }] }]
+            };
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    const errData = await response.json().catch(() => ({}));
+                    const errMsg = errData.error?.message || `Error HTTP ${response.status}`;
+                    chat.messages[chat.messages.length - 1] = {
+                        role: 'assistant',
+                        text: `⚠️ **Error de respuesta (${response.status}):** ${escapeHtml(errMsg)}`,
+                        modelUsed: 'Error API'
+                    };
+                    return;
+                }
+
+                const data = await response.json();
+                const textResponse = data.candidates?.[0]?.content?.parts?.[0]?.text || "No se pudo obtener respuesta del modelo.";
+
+                chat.messages[chat.messages.length - 1] = {
+                    role: 'assistant',
+                    text: textResponse,
+                    modelUsed: modelTag
+                };
+            } catch (error) {
+                console.error("Error al consultar API:", error);
+                chat.messages[chat.messages.length - 1] = {
+                    role: 'assistant',
+                    text: `⚠️ **Error de conexión:** ${escapeHtml(error.message || 'Error de red.')}`,
+                    modelUsed: 'Error Red'
+                };
+            }
+        }
+
+        async function generateImageResponse(chat, prompt, modelTag) {
+            const key = getApiKey();
+            if (!key) {
+                chat.messages[chat.messages.length - 1] = {
+                    role: 'assistant',
+                    text: '⚠️ **Error de API Key:** No se ha detectado una API Key válida.',
+                    modelUsed: 'Error'
+                };
+                return;
+            }
+
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-image:generateContent?key=${key}`;
+            
+            const payload = {
+                contents: [{ parts: [{ text: prompt }] }],
+                generationConfig: {
+                    responseModalities: ['TEXT', 'IMAGE']
+                }
+            };
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    const errData = await response.json().catch(() => ({}));
+                    const errMsg = errData.error?.message || `Error HTTP ${response.status}`;
+                    chat.messages[chat.messages.length - 1] = {
+                        role: 'assistant',
+                        text: `⚠️ **Error al generar imagen (${response.status}):** ${escapeHtml(errMsg)}`,
+                        modelUsed: 'Error API'
+                    };
+                    return;
+                }
+
+                const data = await response.json();
+                
+                // Buscar datos de la imagen dentro de las partes de la respuesta
+                let base64Data = null;
+                const parts = data.candidates?.[0]?.content?.parts || [];
+                for (const part of parts) {
+                    if (part.inlineData && part.inlineData.data) {
+                        base64Data = part.inlineData.data;
+                        break;
+                    }
+                }
+
+                if (base64Data) {
+                    const imgHtml = `<div class="space-y-2 my-2">
+                        <p class="text-xs text-slate-300">Imagen generada para: <strong>"${escapeHtml(prompt)}"</strong></p>
+                        <img src="data:image/png;base64,${base64Data}" alt="Imagen Generada" class="rounded-xl shadow-2xl max-w-full h-auto border border-white/10 glow-effect" />
+                    </div>`;
+                    chat.messages[chat.messages.length - 1] = {
+                        role: 'assistant',
+                        text: imgHtml,
+                        modelUsed: modelTag
+                    };
+                } else {
+                    const textFallback = parts.find(p => p.text)?.text || "No se devolvieron datos de imagen.";
+                    chat.messages[chat.messages.length - 1] = {
+                        role: 'assistant',
+                        text: `⚠️ No se pudo generar la imagen. El modelo respondió: "${escapeHtml(textFallback)}"`,
+                        modelUsed: modelTag
+                    };
+                }
+            } catch (err) {
+                console.error("Error de imagen:", err);
+                chat.messages[chat.messages.length - 1] = {
+                    role: 'assistant',
+                    text: `⚠️ **Error en solicitud de imagen:** ${escapeHtml(err.message || 'Error de red')}`,
+                    modelUsed: 'Error Red'
+                };
+            }
+        }
+
+        function showToast(text) {
+            const toast = document.getElementById('toast');
+            if (!toast) return;
+            document.getElementById('toast-text').innerText = text;
+            toast.classList.remove('opacity-0', 'pointer-events-none');
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'pointer-events-none');
+            }, 2500);
+        }
+
+        window.onload = function() {
+            initTheme();
+            if (conversations.length === 0) {
+                activeChatId = createNewChatState();
+            }
+            renderHistory();
+            renderMessages();
+            closeSidebar();
+        };
+    </script>
+</body>
+</html>
