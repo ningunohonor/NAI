@@ -3,68 +3,66 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NAI - Asistente IA</title>
+    <title>NAI - IA Adaptativa (Nube y PC)</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://js.puter.com/v2/"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <script>
         tailwind.config = {
             darkMode: 'class',
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['Plus Jakarta Sans', 'sans-serif'],
-                    }
-                }
-            }
+            theme: { extend: { fontFamily: { sans: ['Plus Jakarta Sans', 'sans-serif'] } } }
         }
     </script>
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; }
         .glass-panel {
-            background: rgba(15, 23, 42, 0.75);
+            background: rgba(15, 23, 42, 0.8);
             backdrop-filter: blur(16px);
             border: 1px solid rgba(255, 255, 255, 0.08);
         }
         .light .glass-panel {
             background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(16px);
             border: 1px solid rgba(0, 0, 0, 0.12);
         }
-        .custom-scrollbar::-webkit-scrollbar {
-            width: 5px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: rgba(148, 163, 184, 0.2);
-            border-radius: 10px;
-        }
+        .custom-scrollbar::-webkit-scrollbar { width: 5px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.25); border-radius: 10px; }
         .light body { background-color: #f8fafc !important; color: #0f172a !important; }
         .light main { background-color: #f1f5f9 !important; }
-        .light .chat-assistant-bubble {
-            background-color: #ffffff !important;
-            color: #0f172a !important;
-            border: 1px solid #cbd5e1 !important;
+        .light aside { background-color: #ffffff !important; color: #0f172a !important; }
+        .light header, .light .input-wrapper { background-color: rgba(255, 255, 255, 0.94) !important; border-color: #e2e8f0 !important; }
+        .light .input-box { background-color: #e2e8f0 !important; border-color: #cbd5e1 !important; }
+        .light #user-input, .light #model-selector { color: #0f172a !important; }
+        .light #model-selector { background-color: #e2e8f0 !important; border-color: #cbd5e1 !important; }
+        .light .hw-card { background-color: #f1f5f9 !important; border-color: #cbd5e1 !important; color: #0f172a !important; }
+        .light .chat-assistant-bubble { background-color: #ffffff !important; color: #0f172a !important; border: 1px solid #cbd5e1 !important; }
+        .light .chat-user-bubble { background: linear-gradient(135deg, #059669 0%, #10b981 100%) !important; color: #ffffff !important; }
+        .prose-chat pre {
+            background: #020617; color: #e2e8f0; padding: 0.85rem 1rem;
+            border-radius: 0.75rem; overflow-x: auto; margin: 0.6rem 0; font-size: 0.8rem;
         }
-        .light .chat-user-bubble {
-            background: linear-gradient(135deg, #059669 0%, #10b981 100%) !important;
-            color: #ffffff !important;
+        .prose-chat code {
+            background: rgba(16, 185, 129, 0.15); color: #34d399;
+            padding: 0.1rem 0.35rem; border-radius: 0.35rem; font-size: 0.85em;
         }
+        .light .prose-chat code { background: rgba(5, 150, 105, 0.12); color: #047857; }
+        .prose-chat pre code { background: transparent; color: inherit; padding: 0; }
     </style>
 </head>
-<body class="bg-slate-950 dark:bg-slate-950 light:bg-slate-50 text-slate-100 dark:text-slate-100 light:text-slate-900 transition-colors duration-300 min-h-screen flex flex-col antialiased">
+<body class="bg-slate-950 text-slate-100 transition-colors duration-300 min-h-screen flex flex-col antialiased">
 
     <div class="flex h-screen overflow-hidden relative z-10">
         <!-- Sidebar -->
         <aside id="sidebar" class="fixed md:relative inset-y-0 left-0 z-40 w-72 glass-panel flex-shrink-0 flex flex-col justify-between -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out">
-            <div>
-                <div class="p-5 flex items-center justify-between border-b border-white/5 light:border-slate-200">
+            <div class="flex flex-col flex-1 overflow-hidden">
+                <div class="p-5 flex items-center justify-between border-b border-white/5">
                     <div class="flex items-center space-x-3">
                         <div class="w-10 h-10 rounded-2xl bg-emerald-400 flex items-center justify-center text-slate-950 shadow-lg">
                             <i class="fa-solid fa-brain text-xl"></i>
                         </div>
                         <div>
                             <h1 class="font-bold text-lg tracking-tight bg-gradient-to-r from-emerald-400 to-indigo-500 bg-clip-text text-transparent">NAI</h1>
-                            <span class="text-[10px] font-semibold text-emerald-400 uppercase tracking-wider">Asistente IA</span>
+                            <span id="device-tag" class="text-[10px] font-semibold text-emerald-400 uppercase tracking-wider">Analizando equipo...</span>
                         </div>
                     </div>
                     <button onclick="closeSidebar()" class="md:hidden text-slate-400 p-2 rounded-xl hover:bg-white/10">
@@ -72,21 +70,41 @@
                     </button>
                 </div>
 
-                <div class="p-4">
+                <div class="p-4 space-y-2.5">
                     <button onclick="createNewChat()" class="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 text-slate-950 font-bold text-sm shadow-lg flex items-center justify-center space-x-2 transition-transform hover:scale-[1.02]">
                         <i class="fa-solid fa-plus text-xs"></i>
                         <span>Nueva conversación</span>
                     </button>
+
+                    <!-- Login disponible siempre (tanto en PC como en celular) -->
+                    <button id="puter-auth-btn" onclick="handlePuterAuth()" class="w-full py-2.5 px-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-semibold flex items-center justify-between transition-colors">
+                        <span class="flex items-center space-x-2 truncate">
+                            <i id="puter-auth-dot" class="fa-solid fa-circle text-[8px] text-amber-400"></i>
+                            <span id="puter-auth-text" class="truncate">Iniciar sesión (Modelos avanzados)</span>
+                        </span>
+                        <i class="fa-solid fa-right-to-bracket text-[11px] text-emerald-400"></i>
+                    </button>
+
+                    <!-- Diagnóstico de Equipo -->
+                    <div class="hw-card p-3 rounded-xl bg-slate-900/80 border border-white/10 text-[11px] space-y-1">
+                        <div class="font-bold text-emerald-400 uppercase tracking-wider flex items-center justify-between">
+                            <span>Diagnóstico de Equipo</span>
+                            <i id="hw-icon" class="fa-solid fa-desktop"></i>
+                        </div>
+                        <div id="hw-details" class="text-slate-400 leading-snug">
+                            Evaluando potencia...
+                        </div>
+                    </div>
                 </div>
 
-                <div class="px-3 py-2">
+                <div class="px-3 py-1 flex-1 overflow-hidden flex flex-col">
                     <div class="text-[11px] font-semibold text-slate-400 px-3 mb-2 uppercase tracking-wider">Historial</div>
-                    <div id="chat-history" class="space-y-1 max-h-[calc(100vh-280px)] overflow-y-auto custom-scrollbar"></div>
+                    <div id="chat-history" class="space-y-1 flex-1 overflow-y-auto custom-scrollbar"></div>
                 </div>
             </div>
 
-            <div class="p-4 border-t border-white/5 light:border-slate-200">
-                <button onclick="toggleTheme()" class="w-full py-2.5 px-3 rounded-xl bg-white/5 light:bg-slate-200 text-slate-300 light:text-slate-700 text-xs font-semibold flex items-center justify-between">
+            <div class="p-4 border-t border-white/5">
+                <button onclick="toggleTheme()" class="w-full py-2.5 px-3 rounded-xl bg-white/5 text-slate-300 text-xs font-semibold flex items-center justify-between hover:bg-white/10 transition-colors">
                     <span class="flex items-center space-x-2">
                         <i id="theme-icon" class="fa-solid fa-moon text-emerald-400"></i>
                         <span id="theme-text">Modo Oscuro</span>
@@ -97,36 +115,76 @@
         </aside>
 
         <!-- Main Content -->
-        <main class="flex-1 flex flex-col h-full relative overflow-hidden bg-slate-950/50 light:bg-slate-100/50">
-            <header class="h-16 border-b border-white/5 light:border-slate-200 glass-panel flex items-center justify-between px-5 z-20">
-                <div class="flex items-center space-x-3">
-                    <button onclick="openSidebar()" class="md:hidden text-slate-400 p-2 rounded-xl hover:bg-white/10">
+        <main class="flex-1 flex flex-col h-full relative overflow-hidden bg-slate-950/50">
+            <header class="h-16 border-b border-white/5 glass-panel flex items-center justify-between px-4 sm:px-5 z-20 gap-3">
+                <div class="flex items-center space-x-2 sm:space-x-3 flex-1 min-w-0">
+                    <button onclick="openSidebar()" class="md:hidden text-slate-400 p-2 rounded-xl hover:bg-white/10 flex-shrink-0">
                         <i class="fa-solid fa-bars text-xl"></i>
                     </button>
-                    <div class="text-xs font-bold text-emerald-400 uppercase tracking-widest bg-emerald-500/10 px-3 py-1.5 rounded-full border border-emerald-500/20">
-                        Modo Directo Activo
+
+                    <!-- Selector de Modelo -->
+                    <div class="flex items-center space-x-2 min-w-0 flex-1 max-w-lg">
+                        <i class="fa-solid fa-microchip text-emerald-400 text-sm hidden sm:inline"></i>
+                        <select id="model-selector" onchange="onModelChange()" class="w-full bg-slate-900 border border-white/10 text-slate-100 text-xs sm:text-sm font-semibold rounded-xl px-3 py-2 focus:outline-none focus:border-emerald-500 cursor-pointer truncate">
+                            <optgroup id="opt-group-local" label="🖥️ En tu Computadora (Sin Login - Solo PC potente)">
+                                <option value="local-auto">⚡ Auto PC — Ejecutar en tu procesador</option>
+                                <option value="local-high">🧠 Local Alto — Qwen 2.5 0.5B</option>
+                                <option value="local-medium">⚙️ Local Medio — SmolLM2 360M</option>
+                            </optgroup>
+                            <optgroup label="☁️ Nube Gemini (Requiere Iniciar Sesión)">
+                                <option value="cloud-auto">✨ Auto Nube — Gemini 3.0 (3.5 común / 3.6 código)</option>
+                                <option value="google/gemini-3.5-flash">💬 Gemini 3.5 Flash (Respuestas comunes)</option>
+                                <option value="google/gemini-3.6-flash">💻 Gemini 3.6 Flash (Código y programación)</option>
+                                <option value="google/gemini-3-flash-preview">🧭 Gemini 3.0 Flash (Directo)</option>
+                                <option value="google/gemini-3.8-flash">⚡ Gemini 3.8 Flash (Avanzado rápido)</option>
+                            </optgroup>
+                            <optgroup label="🚀 Modelos Avanzados en la Nube (Requiere Iniciar Sesión)">
+                                <option value="google/gemini-4-hydrogen">🌟 Gemini 4 Hydrogen (Uso diario avanzado)</option>
+                                <option value="google/gemini-4-argon">🧬 Gemini 4 Argon (Ingeniería y razonamiento)</option>
+                                <option value="google/gemini-4-carbon">💎 Gemini 4 Carbon (Máxima potencia Google)</option>
+                                <option value="gpt-6-luna">🤖 GPT-6 Luna (OpenAI)</option>
+                                <option value="claude-opus-4-8">🟣 Claude Opus 4.8 (Anthropic)</option>
+                            </optgroup>
+                        </select>
                     </div>
+                </div>
+
+                <div class="hidden sm:flex items-center space-x-2 text-[11px] font-bold text-emerald-400 bg-emerald-500/10 px-3 py-1.5 rounded-full border border-emerald-500/20 flex-shrink-0">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                    <span id="status-text">Analizando...</span>
                 </div>
             </header>
 
+            <!-- Banner dinámico cuando se requiere iniciar sesión (Celular, PC justa, o PC usando modelo nube) -->
+            <div id="login-banner" class="hidden bg-amber-500/15 border-b border-amber-500/30 px-4 py-3 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-xs">
+                <div class="flex items-start space-x-2.5 text-amber-200 light:text-amber-900">
+                    <i id="banner-icon" class="fa-solid fa-cloud text-amber-400 text-base mt-0.5"></i>
+                    <div id="banner-message">
+                        Inicia sesión para ejecutar este modelo en la nube.
+                    </div>
+                </div>
+                <button onclick="handlePuterAuth()" class="px-4 py-1.5 rounded-lg bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold text-xs flex-shrink-0 shadow">
+                    Iniciar sesión
+                </button>
+            </div>
+
             <div id="chat-container" class="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6 custom-scrollbar"></div>
 
-            <div class="p-4 sm:p-6 glass-panel border-t border-white/5 light:border-slate-200 relative z-20">
+            <div class="input-wrapper p-4 sm:p-6 glass-panel border-t border-white/5 relative z-20">
                 <div class="max-w-4xl mx-auto">
-                    <div class="relative flex items-center bg-slate-900 light:bg-slate-200 rounded-2xl border border-white/10 light:border-slate-300 shadow-2xl overflow-hidden">
+                    <div class="input-box relative flex items-center bg-slate-900 rounded-2xl border border-white/10 shadow-2xl overflow-hidden">
                         <textarea 
                             id="user-input" 
                             rows="1" 
                             placeholder="Escribe tu mensaje..." 
                             onkeydown="handleKeyDown(event)"
                             oninput="autoResize(this)"
-                            class="w-full bg-transparent text-slate-100 light:text-slate-900 placeholder-slate-500 rounded-2xl pl-4 pr-14 py-4 text-sm focus:outline-none resize-none max-h-40"
+                            class="w-full bg-transparent text-slate-100 placeholder-slate-500 rounded-2xl pl-4 pr-14 py-4 text-sm focus:outline-none resize-none max-h-40"
                         ></textarea>
-                        
                         <button 
                             id="send-btn"
                             onclick="handleChatSubmit()"
-                            class="absolute right-2.5 bottom-2.5 w-10 h-10 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold rounded-xl flex items-center justify-center transition-all shadow-md"
+                            class="absolute right-2.5 bottom-2.5 w-10 h-10 bg-emerald-500 hover:bg-emerald-400 disabled:opacity-50 text-slate-950 font-bold rounded-xl flex items-center justify-center transition-all shadow-md"
                         >
                             <i class="fa-solid fa-arrow-up text-sm"></i>
                         </button>
@@ -137,193 +195,147 @@
     </div>
 
     <script>
+        // Modelos locales SOLO para PC suficientemente potente
+        const LOCAL_TIERS = {
+            high: {
+                id: 'onnx-community/Qwen2.5-0.5B-Instruct',
+                label: 'PC Local Potente (Qwen 2.5 0.5B)',
+                maxTokens: 320,
+                sizeHint: '~380 MB'
+            },
+            medium: {
+                id: 'onnx-community/SmolLM2-360M-Instruct-ONNX',
+                label: 'PC Local Media (SmolLM2 360M)',
+                maxTokens: 200,
+                sizeHint: '~200 MB'
+            }
+        };
+
         let conversations = [];
         let activeChatId = null;
         let isProcessing = false;
+        let selectedMode = 'cloud-auto';
+        let aiWorker = null;
 
-        function loadStorage() {
-            try {
-                const saved = localStorage.getItem('nai_native_chats');
-                if (saved) conversations = JSON.parse(saved);
-            } catch (e) {}
-            if (conversations.length === 0) {
-                createNewChatState();
-            } else {
-                activeChatId = conversations[0].id;
-                renderHistory();
-                renderMessages();
-            }
-        }
-
-        function saveStorage() {
-            try {
-                localStorage.setItem('nai_native_chats', JSON.stringify(conversations));
-            } catch (e) {}
-        }
-
-        function toggleTheme() {
-            const html = document.documentElement;
-            const isDark = html.classList.contains('dark');
-            setTheme(!isDark);
-        }
-
-        function setTheme(isDark) {
-            const html = document.documentElement;
-            const themeIcon = document.getElementById('theme-icon');
-            const themeText = document.getElementById('theme-text');
-
-            if (isDark) {
-                html.classList.add('dark');
-                html.classList.remove('light');
-                if (themeIcon) themeIcon.className = 'fa-solid fa-moon text-emerald-400';
-                if (themeText) themeText.innerText = 'Modo Oscuro';
-            } else {
-                html.classList.remove('dark');
-                html.classList.add('light');
-                if (themeIcon) themeIcon.className = 'fa-solid fa-sun text-amber-500';
-                if (themeText) themeText.innerText = 'Modo Claro';
-            }
-        }
-
-        function createNewChatState() {
-            const id = 'chat_' + Date.now();
-            const newChat = {
-                title: 'Nueva conversación',
-                messages: [
-                    {
-                        role: 'assistant',
-                        text: '¡Hola! NAI está listo. Puedes escribir lo que necesites y responderá con total fluidez en cualquier momento.'
-                    }
-                ]
-            };
-            conversations.unshift({ id, ...newChat });
-            activeChatId = id;
-            saveStorage();
-            renderHistory();
-            renderMessages();
-        }
-
-        function getActiveChat() {
-            return conversations.find(c => c.id === activeChatId) || conversations[0];
-        }
-
-        function createNewChat() {
-            createNewChatState();
-            closeSidebar();
-        }
-
-        function selectChat(id) {
-            activeChatId = id;
-            renderHistory();
-            renderMessages();
-            closeSidebar();
-        }
-
-        function openSidebar() {
-            document.getElementById('sidebar').classList.remove('-translate-x-full');
-        }
-
-        function closeSidebar() {
-            document.getElementById('sidebar').classList.add('-translate-x-full');
-        }
-
-        function renderHistory() {
-            const container = document.getElementById('chat-history');
-            if (!container) return;
-            container.innerHTML = conversations.map(c => `
-                <div onclick="selectChat('${c.id}')" class="flex items-center justify-between p-2.5 rounded-xl cursor-pointer transition-all ${c.id === activeChatId ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30' : 'text-slate-400 hover:bg-white/5'}">
-                    <span class="text-xs font-medium truncate w-40">${c.title}</span>
-                </div>
-            `).join('');
-        }
-
-        function renderMessages() {
-            const chat = getActiveChat();
-            const container = document.getElementById('chat-container');
-            if (!container) return;
-            container.innerHTML = '';
-
-            chat.messages.forEach(msg => {
-                const msgDiv = document.createElement('div');
-                msgDiv.className = `flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`;
-                
-                if (msg.role === 'user') {
-                    msgDiv.innerHTML = `<div class="chat-user-bubble max-w-[85%] bg-emerald-500 text-slate-950 font-medium px-4 py-3 rounded-2xl rounded-tr-none text-sm">${msg.text}</div>`;
-                } else {
-                    msgDiv.innerHTML = `
-                        <div class="flex space-x-3 max-w-[90%]">
-                            <div class="w-8 h-8 rounded-xl bg-emerald-400 flex items-center justify-center flex-shrink-0 text-slate-950">
-                                <i class="fa-solid fa-brain text-sm"></i>
-                            </div>
-                            <div class="chat-assistant-bubble glass-panel text-slate-200 light:text-slate-900 px-5 py-4 rounded-2xl rounded-tl-none text-sm leading-relaxed shadow-xl">
-                                ${msg.text.replace(/\n/g, '<br>')}
-                            </div>
-                        </div>`;
-                }
-                container.appendChild(msgDiv);
-            });
-            container.scrollTop = container.scrollHeight;
-        }
-
-        function handleKeyDown(e) {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                handleChatSubmit();
-            }
-        }
-
-        function autoResize(textarea) {
-            textarea.style.height = 'auto';
-            textarea.style.height = Math.min(textarea.scrollHeight, 160) + 'px';
-        }
-
-        async function handleChatSubmit() {
-            if (isProcessing) return;
-            const inputEl = document.getElementById('user-input');
-            const prompt = inputEl.value.trim();
-            if (!prompt) return;
-
-            inputEl.value = '';
-            inputEl.style.height = 'auto';
-
-            const chat = getActiveChat();
-            if (chat.messages.length === 1 && chat.title === 'Nueva conversación') {
-                chat.title = prompt.slice(0, 30);
-                renderHistory();
-            }
-
-            chat.messages.push({ role: 'user', text: prompt });
-            renderMessages();
-
-            isProcessing = true;
-            chat.messages.push({ role: 'assistant', text: 'Analizando...' });
-            renderMessages();
-
-            setTimeout(() => {
-                let respuesta = "";
-                const pLower = prompt.toLowerCase();
-                
-                if (pLower.includes('hola') || pLower.includes('saludos')) {
-                    respuesta = "¡Hola! Qué gusto saludarte. ¿En qué te puedo colaborar el día de hoy?";
-                } else if (pLower.includes('quién eres') || pLower.includes('que eres')) {
-                    respuesta = "Soy NAI, tu asistente virtual optimizado para funcionar de manera estable y directa en GitHub Pages.";
-                } else {
-                    respuesta = `He procesado tu consulta: "${prompt}". Este funcionamiento dinámico local asegura que nunca se bloquee tu sitio ni se sature ninguna cuota, permitiendo que cualquier persona interactúe de forma fluida.`;
-                }
-
-                chat.messages[chat.messages.length - 1] = {
-                    role: 'assistant',
-                    text: respuesta
-                };
-                isProcessing = false;
-                saveStorage();
-                renderMessages();
-            }, 600);
-        }
-
-        window.onload = function() {
-            loadStorage();
+        let deviceProfile = {
+            isMobile: false,
+            localBlocked: true,
+            blockReason: '',
+            cores: 2,
+            ramGB: null,
+            hasWebGPU: false,
+            benchMs: 50,
+            tier: 'cloud' // 'high' | 'medium' | 'cloud'
         };
-    </script>
-</body>
-</html>
+
+        // ============================================================
+        // 1. DETECCIÓN DE CELULAR VS COMPUTADORA Y SU POTENCIA
+        // ============================================================
+        function detectIsMobile() {
+            const ua = navigator.userAgent || '';
+            const mobileUA = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile/i.test(ua);
+            const iPadOS = /Macintosh/i.test(ua) && navigator.maxTouchPoints > 1;
+            const uaDataMobile = navigator.userAgentData?.mobile === true;
+            const touchSmall = window.matchMedia('(pointer: coarse)').matches && Math.min(window.screen.width, window.screen.height) <= 900;
+            return Boolean(uaDataMobile || mobileUA || iPadOS || touchSmall);
+        }
+
+        function runQuickCpuBenchmark() {
+            const t0 = performance.now();
+            let acc = 0;
+            for (let i = 1; i <= 1800000; i++) acc += Math.sqrt(i) * 0.0001;
+            if (acc < 0) console.log(acc);
+            return Math.round(performance.now() - t0);
+        }
+
+        async function inspectDeviceAndHardware() {
+            const isMobile = detectIsMobile();
+            const cores = navigator.hardwareConcurrency || 2;
+            const ramGB = typeof navigator.deviceMemory === 'number' ? navigator.deviceMemory : null;
+
+            let hasWebGPU = false;
+            if (!isMobile && 'gpu' in navigator) {
+                try {
+                    const adapter = await navigator.gpu.requestAdapter();
+                    hasWebGPU = Boolean(adapter);
+                } catch (_) {}
+            }
+
+            const benchMs = isMobile ? 999 : runQuickCpuBenchmark();
+
+            let localBlocked = false;
+            let blockReason = '';
+            let tier = 'cloud';
+
+            if (isMobile) {
+                localBlocked = true;
+                blockReason = 'mobile';
+            } else {
+                // Criterio estricto: si la PC es demasiado justa, NO ejecutar adentro
+                const lowRam = ramGB !== null && ramGB < 4;
+                const weakCpu = cores <= 2 || benchMs >= 75;
+                const borderlineNoGpu = !hasWebGPU && (cores < 4 || (ramGB !== null && ramGB <= 4 && benchMs >= 50));
+
+                if (lowRam || weakCpu || borderlineNoGpu) {
+                    localBlocked = true;
+                    blockReason = 'weak_pc';
+                } else if (
+                    (hasWebGPU && (ramGB === null || ramGB >= 4) && cores >= 4) ||
+                    (cores >= 8 && (ramGB === null || ramGB >= 8) && benchMs < 40)
+                ) {
+                    tier = 'high';
+                } else {
+                    tier = 'medium';
+                }
+            }
+
+            deviceProfile = { isMobile, localBlocked, blockReason, cores, ramGB, hasWebGPU, benchMs, tier };
+        }
+
+        function applyDevicePolicyToUI() {
+            const tag = document.getElementById('device-tag');
+            const hwIcon = document.getElementById('hw-icon');
+            const hwDetails = document.getElementById('hw-details');
+            const selector = document.getElementById('model-selector');
+
+            const ramText = deviceProfile.ramGB ? `${deviceProfile.ramGB} GB` : 'No expuesta';
+            const gpuText = deviceProfile.hasWebGPU ? 'WebGPU' : 'CPU';
+
+            // Habilitar o bloquear opciones locales según corresponda
+            Array.from(selector.options).forEach(opt => {
+                if (opt.value.startsWith('local-')) {
+                    opt.disabled = deviceProfile.localBlocked;
+                    const cleanText = opt.text.replace(' (Bloqueado en este equipo)', '');
+                    opt.text = deviceProfile.localBlocked ? cleanText + ' (Bloqueado en este equipo)' : cleanText;
+                }
+            });
+
+            if (deviceProfile.isMobile) {
+                tag.innerText = 'Celular · Solo Nube';
+                hwIcon.className = 'fa-solid fa-mobile-screen-button text-amber-400';
+                hwDetails.innerHTML = `
+                    <div><strong>Equipo:</strong> Celular / Móvil</div>
+                    <div><strong>Ejecución local:</strong> Desactivada</div>
+                    <div class="text-amber-400 font-semibold mt-1">Usa la nube con inicio de sesión</div>
+                `;
+                selectedMode = 'cloud-auto';
+                selector.value = 'cloud-auto';
+                setStatus('Celular · Requiere Login');
+            } else if (deviceProfile.localBlocked) {
+                tag.innerText = 'PC Justa · Modo Nube';
+                hwIcon.className = 'fa-solid fa-laptop text-amber-400';
+                hwDetails.innerHTML = `
+                    <div><strong>CPU:</strong> ${deviceProfile.cores} hilos (${deviceProfile.benchMs} ms)</div>
+                    <div><strong>RAM:</strong> ${ramText} · <strong>Motor:</strong> ${gpuText}</div>
+                    <div class="text-amber-400 font-semibold mt-1">Equipo justo: IA local bloqueada para no trabar tu PC. Se usa la nube.</div>
+                `;
+                selectedMode = 'cloud-auto';
+                selector.value = 'cloud-auto';
+                setStatus('PC Justa · Modo Nube');
+            } else {
+                const tierLabel = deviceProfile.tier === 'high' ? 'Alta (Qwen 2.5 0.5B)' : 'Media (SmolLM2 360M)';
+                tag.innerText = 'PC Lista · Local o Nube';
+                hwIcon.className = 'fa-solid fa-desktop text-emerald-400';
+                hwDetails.innerHTML = `
+                    <div><strong>CPU:</strong> ${deviceProfile.cores} hilos (${deviceProfile.benchMs} ms)</div>
+            
