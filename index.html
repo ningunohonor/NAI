@@ -1,268 +1,224 @@
 <!DOCTYPE html>
 <html lang="es" class="dark">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-    <title>NAI - Asistente IA</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://js.puter.com/v2/" async></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script>tailwind.config = { darkMode: 'class' };</script>
-    <style>
-        .light body { background: #f8fafc !important; color: #0f172a !important; }
-        .light main { background: #f1f5f9 !important; }
-        .light aside, .light header, .light .input-wrap, .light .modal-box { background: #ffffff !important; color: #0f172a !important; border-color: #cbd5e1 !important; }
-        .light .input-box, .light #model-btn, .light .model-card { background: #e2e8f0 !important; color: #0f172a !important; border-color: #cbd5e1 !important; }
-        .light .bubble-ai { background: #ffffff !important; color: #0f172a !important; border: 1px solid #cbd5e1 !important; }
-        .prose-chat pre { background: #020617; color: #e2e8f0; padding: 10px 12px; border-radius: 10px; overflow-x: auto; margin: 8px 0; font-size: 12px; }
-        .prose-chat code { background: rgba(16,185,129,.15); color: #34d399; padding: 2px 5px; border-radius: 4px; font-size: .85em; }
-        .prose-chat pre code { background: transparent; color: inherit; padding: 0; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>NAI - Asistente IA</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://js.puter.com/v2/" async></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<script>tailwind.config={darkMode:'class'};</script>
+<style>
+.light body{background:#f8fafc!important;color:#0f172a!important}
+.light main{background:#f1f5f9!important}
+.light aside,.light header,.light .input-wrap,.light .modal-box{background:#fff!important;color:#0f172a!important;border-color:#cbd5e1!important}
+.light .input-box,.light #model-btn,.light .model-card{background:#e2e8f0!important;color:#0f172a!important;border-color:#cbd5e1!important}
+.light .bubble-ai{background:#fff!important;color:#0f172a!important;border:1px solid #cbd5e1!important}
+.prose-chat pre{background:#020617;color:#e2e8f0;padding:10px;border-radius:10px;overflow-x:auto;margin:6px 0;font-size:12px}
+.prose-chat code{background:rgba(16,185,129,.15);color:#34d399;padding:2px 5px;border-radius:4px;font-size:.85em}
+.prose-chat pre code{background:transparent;color:inherit;padding:0}
+</style>
 </head>
 <body class="bg-slate-950 text-slate-100 h-[100dvh] w-full overflow-hidden flex antialiased">
 
-    <!-- Sidebar -->
-    <aside id="sidebar" class="fixed md:relative inset-y-0 left-0 z-40 w-72 bg-slate-900 border-r border-white/10 flex flex-col justify-between -translate-x-full md:translate-x-0 transition-transform duration-200">
-        <div class="p-4 space-y-3 overflow-y-auto flex-1">
-            <div class="flex items-center justify-between pb-3 border-b border-white/10">
-                <div class="flex items-center space-x-2.5">
-                    <div class="w-9 h-9 rounded-xl bg-emerald-400 text-slate-950 flex items-center justify-center"><i class="fa-solid fa-brain"></i></div>
-                    <div>
-                        <div class="font-bold text-base text-emerald-400 leading-none">NAI</div>
-                        <div id="device-tag" class="text-[10px] text-slate-400 uppercase mt-1">Iniciando...</div>
-                    </div>
-                </div>
-                <button onclick="toggleSidebar(false)" class="md:hidden p-2 text-slate-400"><i class="fa-solid fa-xmark text-lg"></i></button>
-            </div>
-
-            <button onclick="newChat()" class="w-full py-2.5 px-3 rounded-xl bg-emerald-500 text-slate-950 font-bold text-xs flex items-center justify-center space-x-2">
-                <i class="fa-solid fa-plus"></i><span>Nueva conversación</span>
-            </button>
-
-            <button onclick="handleAuthBtn()" class="w-full py-2.5 px-3 rounded-xl bg-white/5 border border-white/10 text-xs font-semibold flex items-center justify-between">
-                <span class="flex items-center space-x-2 truncate">
-                    <i id="auth-dot" class="fa-solid fa-circle text-[8px] text-amber-400"></i>
-                    <span id="auth-label" class="truncate">Iniciar sesión (Nube)</span>
-                </span>
-                <i class="fa-solid fa-right-to-bracket text-emerald-400"></i>
-            </button>
-
-            <div id="hw-box" class="p-2.5 rounded-xl bg-slate-950/60 border border-white/10 text-[11px] text-slate-400 leading-snug"></div>
-
-            <div class="text-[10px] font-bold uppercase text-slate-500 pt-2">Historial</div>
-            <div id="history-list" class="space-y-1"></div>
-        </div>
-
-        <div class="p-3 border-t border-white/10">
-            <button onclick="toggleTheme()" class="w-full py-2 px-3 rounded-xl bg-white/5 text-xs font-semibold flex items-center justify-between">
-                <span id="theme-label">Modo Oscuro</span>
-                <i class="fa-solid fa-circle-half-stroke text-emerald-400"></i>
-            </button>
-        </div>
-    </aside>
-
-    <!-- Main -->
-    <main class="flex-1 flex flex-col h-full min-w-0 bg-slate-950">
-        <header class="h-14 border-b border-white/10 bg-slate-900/90 flex items-center justify-between px-3 gap-2 flex-shrink-0">
-            <div class="flex items-center space-x-2 min-w-0 flex-1">
-                <button onclick="toggleSidebar(true)" class="md:hidden p-2 text-slate-300 flex-shrink-0"><i class="fa-solid fa-bars text-lg"></i></button>
-                <button id="model-btn" onclick="openModal()" class="flex items-center space-x-2 bg-slate-800 border border-white/10 rounded-xl px-3 py-1.5 text-xs font-semibold min-w-0 truncate">
-                    <span id="m-icon">✨</span>
-                    <span id="m-name" class="truncate">Auto (Gemini 3.0)</span>
-                    <i class="fa-solid fa-chevron-down text-[10px] text-slate-400 flex-shrink-0"></i>
-                </button>
-            </div>
-            <div class="text-[11px] font-bold text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/20 flex-shrink-0">
-                <span id="status-text">Iniciando...</span>
-            </div>
-        </header>
-
-        <!-- Banner de Login -->
-        <div id="login-banner" class="hidden bg-amber-500/15 border-b border-amber-500/30 px-3 py-2.5 flex items-center justify-between gap-2 text-xs flex-shrink-0">
-            <span id="banner-msg" class="text-amber-200 light:text-amber-900 leading-tight">Inicia sesión gratis para usar Gemini en la nube.</span>
-            <button onclick="loginDirect()" class="px-3 py-1.5 rounded-lg bg-amber-400 text-slate-950 font-bold text-xs flex-shrink-0">🔑 Iniciar sesión</button>
-        </div>
-
-        <!-- Chat -->
-        <div id="chat-box" class="flex-1 overflow-y-auto p-3 sm:p-5 space-y-4"></div>
-
-        <!-- Input -->
-        <div class="input-wrap p-3 bg-slate-900/90 border-t border-white/10 flex-shrink-0">
-            <div class="input-box max-w-3xl mx-auto flex items-end bg-slate-800 rounded-2xl border border-white/10 p-1.5">
-                <textarea id="user-input" rows="1" placeholder="Escribe tu mensaje..." onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMsg();}" oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,120)+'px';" class="w-full bg-transparent text-slate-100 placeholder-slate-400 px-3 py-2 text-sm focus:outline-none resize-none max-h-32"></textarea>
-                <button id="send-btn" onclick="sendMsg()" class="w-10 h-10 bg-emerald-500 hover:bg-emerald-400 text-slate-950 rounded-xl flex items-center justify-center flex-shrink-0 font-bold">
-                    <i class="fa-solid fa-arrow-up"></i>
-                </button>
-            </div>
-        </div>
-    </main>
-
-    <!-- Modal Modelos -->
-    <div id="model-modal" onclick="if(event.target===this) closeModal()" class="hidden fixed inset-0 z-50 bg-black/75 flex items-end sm:items-center justify-center p-0 sm:p-4">
-        <div class="modal-box w-full sm:max-w-md bg-slate-900 border border-white/10 rounded-t-3xl sm:rounded-2xl max-h-[80dvh] flex flex-col overflow-hidden">
-            <div class="p-4 border-b border-white/10 flex items-center justify-between">
-                <div>
-                    <div class="font-bold text-sm">Elegir Modelo de IA</div>
-                    <div id="modal-sub" class="text-[11px] text-slate-400"></div>
-                </div>
-                <button onclick="closeModal()" class="p-2 text-slate-400"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-            <div id="modal-list" class="p-4 space-y-4 overflow-y-auto"></div>
-        </div>
+<aside id="sidebar" class="fixed md:relative inset-y-0 left-0 z-40 w-72 bg-slate-900 border-r border-white/10 flex flex-col justify-between -translate-x-full md:translate-x-0 transition-transform duration-200">
+  <div class="p-4 space-y-3 overflow-y-auto flex-1">
+    <div class="flex items-center justify-between pb-3 border-b border-white/10">
+      <div class="flex items-center space-x-2.5">
+        <div class="w-9 h-9 rounded-xl bg-emerald-400 text-slate-950 flex items-center justify-center"><i class="fa-solid fa-brain"></i></div>
+        <div><div class="font-bold text-base text-emerald-400 leading-none">NAI</div><div id="device-tag" class="text-[10px] text-slate-400 uppercase mt-1">...</div></div>
+      </div>
+      <button onclick="toggleSidebar(false)" class="md:hidden p-2 text-slate-400"><i class="fa-solid fa-xmark text-lg"></i></button>
     </div>
+    <button onclick="newChat()" class="w-full py-2.5 px-3 rounded-xl bg-emerald-500 text-slate-950 font-bold text-xs flex items-center justify-center space-x-2"><i class="fa-solid fa-plus"></i><span>Nueva conversación</span></button>
+    <button onclick="handleAuthBtn()" class="w-full py-2.5 px-3 rounded-xl bg-white/5 border border-white/10 text-xs font-semibold flex items-center justify-between">
+      <span class="flex items-center space-x-2 truncate"><i id="auth-dot" class="fa-solid fa-circle text-[8px] text-amber-400"></i><span id="auth-label" class="truncate">Iniciar sesión (Nube)</span></span>
+      <i class="fa-solid fa-right-to-bracket text-emerald-400"></i>
+    </button>
+    <div id="hw-box" class="p-2.5 rounded-xl bg-slate-950/60 border border-white/10 text-[11px] text-slate-400 leading-snug"></div>
+    <div class="text-[10px] font-bold uppercase text-slate-500 pt-1">Historial</div>
+    <div id="history-list" class="space-y-1"></div>
+  </div>
+  <div class="p-3 border-t border-white/10">
+    <button onclick="toggleTheme()" class="w-full py-2 px-3 rounded-xl bg-white/5 text-xs font-semibold flex items-center justify-between"><span id="theme-label">Modo Oscuro</span><i class="fa-solid fa-circle-half-stroke text-emerald-400"></i></button>
+  </div>
+</aside>
 
-    <script>
-        window.onerror = function(msg, url, line) {
-            const box = document.getElementById('chat-box');
-            const st = document.getElementById('status-text');
-            if (st) st.innerText = 'Error JS';
-            if (box) box.innerHTML += `<div class="p-3 rounded-xl bg-rose-500/20 border border-rose-500 text-xs text-rose-200">Error línea ${line}: ${msg}</div>`;
-        };
-    </script>
+<main class="flex-1 flex flex-col h-full min-w-0 bg-slate-950">
+  <header class="h-14 border-b border-white/10 bg-slate-900/90 flex items-center justify-between px-3 gap-2 flex-shrink-0">
+    <div class="flex items-center space-x-2 min-w-0 flex-1">
+      <button onclick="toggleSidebar(true)" class="md:hidden p-2 text-slate-300 flex-shrink-0"><i class="fa-solid fa-bars text-lg"></i></button>
+      <button id="model-btn" onclick="openModal()" class="flex items-center space-x-2 bg-slate-800 border border-white/10 rounded-xl px-3 py-1.5 text-xs font-semibold min-w-0 truncate">
+        <span id="m-icon">✨</span><span id="m-name" class="truncate">Auto (Gemini 3.0)</span><i class="fa-solid fa-chevron-down text-[10px] text-slate-400 flex-shrink-0"></i>
+      </button>
+    </div>
+    <div class="text-[11px] font-bold text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/20 flex-shrink-0"><span id="status-text">...</span></div>
+  </header>
 
-    <script>
-        const LOCAL_MODELS = [
-            { id: 'local-auto', icon: '⚡', name: 'Auto PC (En tu procesador)', desc: 'Ajustado a tu PC. Sin login.', tag: 'Sin Login' },
-            { id: 'local-high', icon: '🧠', name: 'Qwen 2.5 0.5B (PC Potente)', desc: 'Mejor español local.', tag: 'Sin Login' },
-            { id: 'local-medium', icon: '⚙️', name: 'SmolLM2 360M (PC Media)', desc: 'Más ligero.', tag: 'Sin Login' }
-        ];
-        const CLOUD_MODELS = [
-            { id: 'cloud-auto', icon: '✨', name: 'Auto (Gemini 3.0)', desc: 'Elige 3.5 para común y 3.6 para código.', tag: 'Recomendado' },
-            { id: 'google/gemini-3.5-flash', icon: '💬', name: 'Gemini 3.5 Flash', desc: 'Respuestas comunes y rápidas.', tag: 'Común' },
-            { id: 'google/gemini-3.6-flash', icon: '💻', name: 'Gemini 3.6 Flash', desc: 'Especialista en código.', tag: 'Código' },
-            { id: 'google/gemini-3-flash-preview', icon: '🧭', name: 'Gemini 3.0 Flash', desc: 'Directo.', tag: 'Nube' },
-            { id: 'google/gemini-3.8-flash', icon: '⚡', name: 'Gemini 3.8 Flash', desc: 'Avanzado rápido.', tag: 'Nube' },
-            { id: 'google/gemini-4-hydrogen', icon: '🌟', name: 'Gemini 4 Hydrogen', desc: 'Uso diario avanzado.', tag: 'Avanzado' },
-            { id: 'google/gemini-4-argon', icon: '🧬', name: 'Gemini 4 Argon', desc: 'Ingeniería y razonamiento.', tag: 'Avanzado' },
-            { id: 'google/gemini-4-carbon', icon: '💎', name: 'Gemini 4 Carbon', desc: 'Máxima potencia Google.', tag: 'Top' },
-            { id: 'gpt-6-luna', icon: '🤖', name: 'GPT-6 Luna', desc: 'Modelo de OpenAI.', tag: 'Avanzado' },
-            { id: 'claude-opus-4-8', icon: '🟣', name: 'Claude Opus 4.8', desc: 'Modelo de Anthropic.', tag: 'Avanzado' }
-        ];
+  <div id="login-banner" class="hidden bg-amber-500/15 border-b border-amber-500/30 px-3 py-2.5 flex items-center justify-between gap-2 text-xs flex-shrink-0">
+    <span class="text-amber-200 light:text-amber-900 leading-tight">Inicia sesión gratis para usar Gemini en la nube.</span>
+    <button onclick="loginDirect()" class="px-3 py-1.5 rounded-lg bg-amber-400 text-slate-950 font-bold text-xs flex-shrink-0">🔑 Iniciar sesión</button>
+  </div>
 
-        let chats = [], activeId = null, busy = false, mode = 'cloud-auto', worker = null;
-        let hw = { isMobile: true, localBlocked: true, cores: 2, ram: null, gpu: false, tier: 'cloud' };
+  <div id="chat-box" class="flex-1 overflow-y-auto p-3 sm:p-5 space-y-4"></div>
 
-        const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-        function fmt(text) {
-            const blocks = [];
-            let t = String(text).replace(/```[\w-]*\n?([\s\S]*?)```/g, (_, c) => {
-                blocks.push(`<pre><code>${esc(c.trimEnd())}</code></pre>`);
-                return `@@B${blocks.length-1}@@`;
-            });
-            t = esc(t).replace(/`([^`\n]+)`/g,'<code>$1</code>').replace(/\*\*([^*\n]+)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>');
-            blocks.forEach((b, i) => t = t.replace(`@@B${i}@@`, b));
-            return t;
-        }
-        const getLS = k => { try { return localStorage.getItem(k); } catch { return null; } };
-        const setLS = (k, v) => { try { localStorage.setItem(k, v); } catch {} };
-        const isSignedIn = () => { try { return typeof puter !== 'undefined' && puter.auth && puter.auth.isSignedIn(); } catch { return false; } };
+  <div class="input-wrap p-3 bg-slate-900/90 border-t border-white/10 flex-shrink-0">
+    <div class="input-box max-w-3xl mx-auto flex items-end bg-slate-800 rounded-2xl border border-white/10 p-1.5">
+      <textarea id="user-input" rows="1" placeholder="Escribe tu mensaje..." onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMsg();}" oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,120)+'px';" class="w-full bg-transparent text-slate-100 placeholder-slate-400 px-3 py-2 text-sm focus:outline-none resize-none max-h-32"></textarea>
+      <button id="send-btn" onclick="sendMsg()" class="w-10 h-10 bg-emerald-500 hover:bg-emerald-400 text-slate-950 rounded-xl flex items-center justify-center flex-shrink-0 font-bold"><i class="fa-solid fa-arrow-up"></i></button>
+    </div>
+  </div>
+</main>
 
-        function detectHardwareSync() {
-            const ua = navigator.userAgent || '';
-            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile|Tablet/i.test(ua) || (navigator.maxTouchPoints > 0 && window.innerWidth <= 1024);
-            const cores = navigator.hardwareConcurrency || 2;
-            const ram = typeof navigator.deviceMemory === 'number' ? navigator.deviceMemory : null;
+<div id="model-modal" onclick="if(event.target===this)closeModal()" class="hidden fixed inset-0 z-50 bg-black/75 flex items-end sm:items-center justify-center p-0 sm:p-4">
+  <div class="modal-box w-full sm:max-w-md bg-slate-900 border border-white/10 rounded-t-3xl sm:rounded-2xl max-h-[80dvh] flex flex-col overflow-hidden">
+    <div class="p-4 border-b border-white/10 flex items-center justify-between">
+      <div><div class="font-bold text-sm">Elegir Modelo de IA</div><div id="modal-sub" class="text-[11px] text-slate-400"></div></div>
+      <button onclick="closeModal()" class="p-2 text-slate-400"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div id="modal-list" class="p-4 space-y-4 overflow-y-auto"></div>
+  </div>
+</div>
 
-            let benchMs = 999;
-            if (!isMobile) {
-                const t0 = performance.now();
-                let x = 0; for (let i = 1; i <= 1200000; i++) x += Math.sqrt(i);
-                if (x < 0) console.log(x);
-                benchMs = Math.round(performance.now() - t0);
-            }
+<script>
+window.onerror=function(m,u,l){document.getElementById('status-text').innerText='Error';document.getElementById('chat-box').innerHTML+='<div class="p-3 rounded-xl bg-rose-500/20 border border-rose-500 text-xs text-rose-200">Línea '+l+': '+m+'</div>';};
+setTimeout(function(){if(!window.__NAI_OK){document.getElementById('status-text').innerText='Incompleto';document.getElementById('chat-box').innerHTML='<div class="p-4 rounded-xl bg-rose-500/20 border border-rose-500 text-xs text-rose-200">⚠️ El archivo index.html se copió incompleto (faltó el final del código).</div>';}},1500);
+</script>
 
-            const weakPC = (ram !== null && ram < 4) || cores <= 2 || benchMs >= 75;
-            const localBlocked = isMobile || weakPC;
-            const tier = localBlocked ? 'cloud' : (cores >= 8 && (ram === null || ram >= 8) && benchMs < 40 ? 'high' : 'medium');
-            hw = { isMobile, localBlocked, cores, ram, gpu: false, benchMs, tier };
-        }
+<script>
+window.__NAI_OK=true;
+const LOCAL_M=[
+  {id:'local-auto',icon:'⚡',name:'Auto PC (Tu procesador)',desc:'Ajustado a tu PC. Sin login.',tag:'Sin Login'},
+  {id:'local-high',icon:'🧠',name:'Qwen 2.5 0.5B (PC Potente)',desc:'Buen español local.',tag:'Sin Login'},
+  {id:'local-medium',icon:'⚙️',name:'SmolLM2 360M (PC Media)',desc:'Ligero para CPU.',tag:'Sin Login'}
+];
+const CLOUD_M=[
+  {id:'cloud-auto',icon:'✨',name:'Auto (Gemini 3.0)',desc:'3.5 para común y 3.6 para código.',tag:'Recomendado'},
+  {id:'google/gemini-3.5-flash',icon:'💬',name:'Gemini 3.5 Flash',desc:'Respuestas comunes.',tag:'Común'},
+  {id:'google/gemini-3.6-flash',icon:'💻',name:'Gemini 3.6 Flash',desc:'Especialista en código.',tag:'Código'},
+  {id:'google/gemini-3-flash-preview',icon:'🧭',name:'Gemini 3.0 Flash',desc:'Directo.',tag:'Nube'},
+  {id:'google/gemini-3.8-flash',icon:'⚡',name:'Gemini 3.8 Flash',desc:'Rápido avanzado.',tag:'Nube'},
+  {id:'google/gemini-4-hydrogen',icon:'🌟',name:'Gemini 4 Hydrogen',desc:'Uso diario avanzado.',tag:'Avanzado'},
+  {id:'google/gemini-4-argon',icon:'🧬',name:'Gemini 4 Argon',desc:'Razonamiento e ingeniería.',tag:'Avanzado'},
+  {id:'google/gemini-4-carbon',icon:'💎',name:'Gemini 4 Carbon',desc:'Máxima potencia Google.',tag:'Top'},
+  {id:'gpt-6-luna',icon:'🤖',name:'GPT-6 Luna',desc:'OpenAI avanzado.',tag:'Avanzado'},
+  {id:'claude-opus-4-8',icon:'🟣',name:'Claude Opus 4.8',desc:'Anthropic avanzado.',tag:'Avanzado'}
+];
+let chats=[],activeId=null,busy=false,mode='cloud-auto',worker=null,hw={isMobile:true,localBlocked:true,cores:2,ram:null,gpu:false,tier:'cloud'};
+const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+function fmt(t){const b=[];let x=String(t).replace(/```[\w-]*\n?([\s\S]*?)```/g,(_,c)=>{b.push('<pre><code>'+esc(c.trimEnd())+'</code></pre>');return'@@B'+(b.length-1)+'@@';});x=esc(x).replace(/`([^`\n]+)`/g,'<code>$1</code>').replace(/\*\*([^*\n]+)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>');b.forEach((h,i)=>x=x.replace('@@B'+i+'@@',h));return x;}
+const getLS=k=>{try{return localStorage.getItem(k)}catch{return null}};
+const setLS=(k,v)=>{try{localStorage.setItem(k,v)}catch{}};
+const isSignedIn=()=>{try{return typeof puter!=='undefined'&&puter.auth&&puter.auth.isSignedIn()}catch{return false}};
 
-        function updateUI() {
-            if (hw.localBlocked && mode.startsWith('local-')) mode = 'cloud-auto';
-            const all = hw.localBlocked ? CLOUD_MODELS : [...LOCAL_MODELS, ...CLOUD_MODELS];
-            const info = all.find(m => m.id === mode) || CLOUD_MODELS[0];
-            mode = info.id;
-
-            document.getElementById('m-icon').innerText = info.icon;
-            document.getElementById('m-name').innerText = info.name;
-            document.getElementById('device-tag').innerText = hw.isMobile ? 'Celular · Nube' : (hw.localBlocked ? 'PC Justa · Nube' : 'PC · Local/Nube');
-            document.getElementById('hw-box').innerHTML = hw.isMobile
-                ? '📱 <strong>Celular:</strong> IA local bloqueada. Usa la nube con sesión.'
-                : (hw.localBlocked
-                    ? `💻 <strong>PC Justa (${hw.cores} hilos):</strong> Se usa la nube para no trabarse.`
-                    : `🖥️ <strong>PC Lista (${hw.cores} hilos):</strong> Local o Nube disponibles.`);
-
-            const signed = isSignedIn();
-            document.getElementById('auth-dot').className = `fa-solid fa-circle text-[8px] ${signed ? 'text-emerald-400' : 'text-amber-400'}`;
-            document.getElementById('auth-label').innerText = signed ? 'Sesión activa' : 'Iniciar sesión (Nube)';
-            document.getElementById('login-banner').classList.toggle('hidden', signed || mode.startsWith('local-'));
-            document.getElementById('status-text').innerText = mode.startsWith('local-') ? 'Listo (Local)' : (signed ? 'Nube Activa' : 'Requiere Login');
-        }
-
-        function toggleSidebar(open) { document.getElementById('sidebar').classList.toggle('-translate-x-full', !open); }
-        function toggleTheme() {
-            const dark = !document.documentElement.classList.contains('dark');
-            document.documentElement.classList.toggle('dark', dark);
-            document.documentElement.classList.toggle('light', !dark);
-            document.getElementById('theme-label').innerText = dark ? 'Modo Oscuro' : 'Modo Claro';
-            setLS('nai_v5_theme', dark ? 'dark' : 'light');
-        }
-
-        function openModal() {
-            document.getElementById('modal-sub').innerText = hw.localBlocked ? 'Solo modelos en la nube disponibles para este equipo.' : 'Elige Local (sin login) o Nube (con login).';
-            const card = m => `<button onclick="pickModel('${m.id}')" class="model-card w-full text-left p-3 rounded-xl border flex justify-between items-start gap-2 ${m.id===mode?'bg-emerald-500/15 border-emerald-500':'bg-slate-800 border-white/10'}">
-                <div class="flex space-x-2.5 min-w-0"><span class="text-lg">${m.icon}</span><div class="min-w-0"><div class="text-xs font-bold truncate">${esc(m.name)}</div><div class="text-[11px] text-slate-400">${esc(m.desc)}</div></div></div>
-                <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-white/10 flex-shrink-0">${m.tag}</span></button>`;
-            let html = '';
-            if (!hw.localBlocked) html += `<div><div class="text-[10px] font-bold uppercase text-slate-400 mb-2">🖥️ En tu PC (Sin Login)</div><div class="space-y-2">${LOCAL_MODELS.map(card).join('')}</div></div>`;
-            html += `<div><div class="text-[10px] font-bold uppercase text-slate-400 mb-2">☁️ En la Nube (Requiere Sesión)</div><div class="space-y-2">${CLOUD_MODELS.map(card).join('')}</div></div>`;
-            document.getElementById('modal-list').innerHTML = html;
-            document.getElementById('model-modal').classList.remove('hidden');
-        }
-        function closeModal() { document.getElementById('model-modal').classList.add('hidden'); }
-        function pickModel(id) { mode = id; setLS('nai_v5_mode', mode); updateUI(); closeModal(); }
-
-        function loginDirect(cb) {
-            if (typeof puter === 'undefined' || !puter.auth) {
-                addMsg('assistant', '⚠️ **Puter.js aún está cargando o fue bloqueado.** Espera 2 segundos o desactiva bloqueadores de anuncios.', 'Aviso');
-                return;
-            }
-            document.getElementById('status-text').innerText = 'Abriendo login...';
-            puter.auth.signIn().then(() => { updateUI(); if (cb) cb(); }).catch(e => {
-                const msg = e?.message || e?.error || JSON.stringify(e);
-                updateUI();
-                if (!String(msg).includes('auth_window_closed')) addMsg('assistant', `⚠️ **Error de login:** ${msg}`, 'Aviso');
-            });
-        }
-        function handleAuthBtn() {
-            if (isSignedIn()) { if (confirm('¿Cerrar sesión?')) { puter.auth.signOut(); updateUI(); } }
-            else loginDirect();
-        }
-
-        function newChat() {
-            if (busy) return;
-            const id = 'c_' + Date.now();
-            const txt = hw.localBlocked ? '👋 ¡Hola! Toca **🔑 Iniciar sesión** arriba para activar Gemini 3.0 / 3.5 / 3.6 y modelos avanzados.' : '🖥️ ¡Hola! Tu PC soporta ejecución local sin login o modelos avanzados en la nube.';
-            chats.unshift({ id, title: 'Nueva conversación', msgs: [{ role: 'assistant', sys: true, label: 'NAI', text: txt }] });
-            activeId = id; saveChats(); renderHistory(); renderMsgs(); toggleSidebar(false);
-        }
-        const getChat = () => chats.find(c => c.id === activeId) || chats[0];
-        const saveChats = () => setLS('nai_v5_chats', JSON.stringify(chats));
-        function addMsg(role, text, label) { getChat().msgs.push({ role, text, label, sys: role==='assistant'&&label==='Aviso' }); saveChats(); renderMsgs(); }
-
-        function renderHistory() {
-            document.getElementById('history-list').innerHTML = chats.map(c => `<div onclick="activeId='${c.id}';renderHistory();renderMsgs();toggleSidebar(false)" class="p-2 rounded-lg text-xs truncate cursor-pointer ${c.id===activeId?'bg-emerald-500/20 text-emerald-400':'text-slate-400'}">${esc(c.title)}</div>`).join('');
-        }
-        function renderMsgs() {
-            const box = document.getElementById('chat-box');
-            box.innerHTML = getChat().msgs.map(m => m.role === 'user'
-                ? `<div class="flex justify-end"><div class="max-w-[85%] bg-emerald-500 text-slate-950 font-medium px-4 py-2.5 rounded-2xl rounded-tr-none text-sm">${fmt(m.text)}</div></div>`
-                : `<div class="flex justify-start"><div class="bubble-ai prose-chat max-w-[90%] bg-slate-900 border border-white/10 px-4 py-3 rounded-2xl rounded-tl-none text-sm">${m.label?`<div class="text-[10px] font-bold text-emerald-400 uppercase mb-1">${esc(m.label)}</div>`:''}<div ${m.stream?'id="stream-body"':''}>${m.text?fmt(m.text):'<i class="fa-solid fa-circle-notch fa-spin text-emerald-400 mr-2"></i>Pensando...'}</div></div></div>`
-            ).join('');
-            box.scrollTop = box.scrollHeight;
-        }
-
-        function runLocal(hist, msgObj) {
-            return new Promise((resolve, reject) => {
-                if (!worker) {
-                    const code = `import { pipeline, TextStreamer, env } from 'https://cdn.jsdelivr.net/npm/@huggingface/transformers'; const cache=new Map(); self.onmessage=async e=>{ const {id,model,dev,msgs,max}=e.data; try{ if(env?.backends?.onnx?.wasm) env.backends.onnx.wasm.numThreads=1; let g=cache.get(model); if(!g){ g=await pipeline('text-generation',model,{device:dev,dtype:'q4',progress_callback:p=>{if(p.status==='progress')self.postMessage({id,ev:'prog',p:Math.round(p.progress)})}}); cache.set(model,g); } let out=''; const st=new TextStreamer(g.tokenizer,{skip_prompt:true,skip_special_tokens:true,callback_function:t=>{out+=t;self.postMessage({id,ev:'tok',t:out})}}); await g(msgs,{max_new_tokens:max,do_sample:true,temperature:0.65,streamer:st}); self.postMe
+function detectHW(){
+  const ua=navigator.userAgent||'';
+  const isMobile=/Android|webOS|iPhone|iPad|iPod|Mobile|Tablet/i.test(ua)||(navigator.maxTouchPoints>0&&innerWidth<=1024);
+  const cores=navigator.hardwareConcurrency||2;
+  const ram=typeof navigator.deviceMemory==='number'?navigator.deviceMemory:null;
+  let bench=999;
+  if(!isMobile){const t0=performance.now();let a=0;for(let i=1;i<=1200000;i++)a+=Math.sqrt(i);if(a<0)console.log(a);bench=Math.round(performance.now()-t0);}
+  const localBlocked=isMobile||(ram!==null&&ram<4)||cores<=2||bench>=75;
+  const tier=localBlocked?'cloud':(cores>=8&&(ram===null||ram>=8)&&bench<40?'high':'medium');
+  hw={isMobile,localBlocked,cores,ram,gpu:false,tier};
+}
+function updateUI(){
+  if(hw.localBlocked&&mode.startsWith('local-'))mode='cloud-auto';
+  const all=hw.localBlocked?CLOUD_M:[...LOCAL_M,...CLOUD_M];
+  const info=all.find(m=>m.id===mode)||CLOUD_M[0];
+  mode=info.id;
+  document.getElementById('m-icon').innerText=info.icon;
+  document.getElementById('m-name').innerText=info.name;
+  document.getElementById('device-tag').innerText=hw.isMobile?'Celular · Nube':(hw.localBlocked?'PC Justa · Nube':'PC · Local/Nube');
+  document.getElementById('hw-box').innerHTML=hw.isMobile?'📱 <b>Celular:</b> IA local desactivada. Usa la nube con sesión.':(hw.localBlocked?'💻 <b>PC Justa:</b> Usa la nube para no trabarse.':'🖥️ <b>PC Lista ('+hw.cores+' hilos):</b> Local o Nube.');
+  const s=isSignedIn();
+  document.getElementById('auth-dot').className='fa-solid fa-circle text-[8px] '+(s?'text-emerald-400':'text-amber-400');
+  document.getElementById('auth-label').innerText=s?'Sesión activa':'Iniciar sesión (Nube)';
+  document.getElementById('login-banner').classList.toggle('hidden',s||mode.startsWith('local-'));
+  document.getElementById('status-text').innerText=mode.startsWith('local-')?'Local PC':(s?'Nube Activa':'Falta Login');
+}
+function toggleSidebar(o){document.getElementById('sidebar').classList.toggle('-translate-x-full',!o);}
+function toggleTheme(){const d=!document.documentElement.classList.contains('dark');document.documentElement.classList.toggle('dark',d);document.documentElement.classList.toggle('light',!d);document.getElementById('theme-label').innerText=d?'Modo Oscuro':'Modo Claro';setLS('nai_v6_t',d?'dark':'light');}
+function openModal(){
+  document.getElementById('modal-sub').innerText=hw.localBlocked?'Solo modelos en la nube para este equipo.':'Elige Local (sin login) o Nube (con login).';
+  const card=m=>'<button onclick="pickModel(\''+m.id+'\')" class="model-card w-full text-left p-3 rounded-xl border flex justify-between items-start gap-2 '+(m.id===mode?'bg-emerald-500/15 border-emerald-500':'bg-slate-800 border-white/10')+'"><div class="flex space-x-2.5 min-w-0"><span class="text-lg">'+m.icon+'</span><div class="min-w-0"><div class="text-xs font-bold truncate">'+esc(m.name)+'</div><div class="text-[11px] text-slate-400">'+esc(m.desc)+'</div></div></div><span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-white/10 flex-shrink-0">'+m.tag+'</span></button>';
+  let h='';
+  if(!hw.localBlocked)h+='<div><div class="text-[10px] font-bold uppercase text-slate-400 mb-2">🖥️ En tu PC (Sin Login)</div><div class="space-y-2">'+LOCAL_M.map(card).join('')+'</div></div>';
+  h+='<div><div class="text-[10px] font-bold uppercase text-slate-400 mb-2">☁️ En la Nube (Requiere Sesión)</div><div class="space-y-2">'+CLOUD_M.map(card).join('')+'</div></div>';
+  document.getElementById('modal-list').innerHTML=h;
+  document.getElementById('model-modal').classList.remove('hidden');
+}
+function closeModal(){document.getElementById('model-modal').classList.add('hidden');}
+function pickModel(id){mode=id;setLS('nai_v6_m',mode);updateUI();closeModal();}
+function loginDirect(cb){
+  if(typeof puter==='undefined'||!puter.auth){addMsg('assistant','⚠️ **Puter.js no ha cargado aún.** Revisa tu internet o bloqueadores de anuncios.','Aviso');return;}
+  document.getElementById('status-text').innerText='Abriendo login...';
+  puter.auth.signIn().then(()=>{updateUI();if(cb)cb();}).catch(e=>{updateUI();const msg=e?.message||e?.error||JSON.stringify(e);if(!String(msg).includes('auth_window_closed'))addMsg('assistant','⚠️ **Login:** '+msg,'Aviso');});
+}
+function handleAuthBtn(){if(isSignedIn()){if(confirm('¿Cerrar sesión?')){puter.auth.signOut();updateUI();}}else loginDirect();}
+function newChat(){
+  if(busy)return;
+  const id='c_'+Date.now();
+  const txt=hw.localBlocked?'👋 ¡Hola! Toca **🔑 Iniciar sesión** arriba para activar Gemini 3.0 / 3.5 / 3.6 y modelos avanzados.':'🖥️ ¡Hola! Tu PC soporta ejecución local sin login o modelos avanzados en la nube.';
+  chats.unshift({id,title:'Nueva conversación',msgs:[{role:'assistant',sys:true,label:'NAI',text:txt}]});
+  activeId=id;saveChats();renderHistory();renderMsgs();toggleSidebar(false);
+}
+const getChat=()=>chats.find(c=>c.id===activeId)||chats[0];
+const saveChats=()=>setLS('nai_v6_c',JSON.stringify(chats));
+function addMsg(role,text,label){getChat().msgs.push({role,text,label,sys:role==='assistant'&&label==='Aviso'});saveChats();renderMsgs();}
+function renderHistory(){document.getElementById('history-list').innerHTML=chats.map(c=>'<div onclick="activeId=\''+c.id+'\';renderHistory();renderMsgs();toggleSidebar(false)" class="p-2 rounded-lg text-xs truncate cursor-pointer '+(c.id===activeId?'bg-emerald-500/20 text-emerald-400':'text-slate-400')+'">'+esc(c.title)+'</div>').join('');}
+function renderMsgs(){
+  const b=document.getElementById('chat-box');
+  b.innerHTML=getChat().msgs.map(m=>m.role==='user'
+    ?'<div class="flex justify-end"><div class="max-w-[85%] bg-emerald-500 text-slate-950 font-medium px-4 py-2.5 rounded-2xl rounded-tr-none text-sm">'+fmt(m.text)+'</div></div>'
+    :'<div class="flex justify-start"><div class="bubble-ai prose-chat max-w-[90%] bg-slate-900 border border-white/10 px-4 py-3 rounded-2xl rounded-tl-none text-sm">'+(m.label?'<div class="text-[10px] font-bold text-emerald-400 uppercase mb-1">'+esc(m.label)+'</div>':'')+'<div '+(m.stream?'id="sb"':'')+'>'+(m.text?fmt(m.text):'<i class="fa-solid fa-circle-notch fa-spin text-emerald-400 mr-2"></i>Pensando...')+'</div></div></div>'
+  ).join('');
+  b.scrollTop=b.scrollHeight;
+}
+function runLocal(hist,msgObj){
+  return new Promise((res,rej)=>{
+    if(!worker){
+      const code="import {pipeline,TextStreamer,env} from 'https://cdn.jsdelivr.net/npm/@huggingface/transformers';const c=new Map();self.onmessage=async e=>{const{id,m,d,msgs,max}=e.data;try{if(env?.backends?.onnx?.wasm)env.backends.onnx.wasm.numThreads=1;let g=c.get(m);if(!g){g=await pipeline('text-generation',m,{device:d,dtype:'q4',progress_callback:p=>{if(p.status==='progress')self.postMessage({id,ev:'p',p:Math.round(p.progress)})}});c.set(m,g);}let o='';const s=new TextStreamer(g.tokenizer,{skip_prompt:true,skip_special_tokens:true,callback_function:t=>{o+=t;self.postMessage({id,ev:'t',t:o})}});await g(msgs,{max_new_tokens:max,do_sample:true,temperature:0.65,streamer:s});self.postMessage({id,ev:'d',t:o.trim()})}catch(err){self.postMessage({id,ev:'e',e:err.message||String(err)})}};";
+      worker=new Worker(URL.createObjectURL(new Blob([code],{type:'application/javascript'})),{type:'module'});
+    }
+    const high=mode==='local-high'||(mode==='local-auto'&&hw.tier==='high');
+    const m=high?'onnx-community/Qwen2.5-0.5B-Instruct':'onnx-community/SmolLM2-360M-Instruct-ONNX';
+    const id='r'+Date.now();
+    const fn=e=>{const d=e.data;if(!d||d.id!==id)return;if(d.ev==='p'){msgObj.text='*Descargando: '+d.p+'%*';renderMsgs();}else if(d.ev==='t'){msgObj.text=d.t;const sb=document.getElementById('sb');if(sb){sb.innerHTML=fmt(d.t);document.getElementById('chat-box').scrollTop=999999;}}else if(d.ev==='d'){worker.removeEventListener('message',fn);res(d.t||'Sin respuesta.');}else if(d.ev==='e'){worker.removeEventListener('message',fn);rej(new Error(d.e));}};
+    worker.addEventListener('message',fn);
+    worker.postMessage({id,m,d:hw.gpu?'webgpu':'wasm',max:high?300:180,msgs:[{role:'system',content:'You are NAI. Answer in the user language.'},...hist.slice(-4).map(x=>({role:x.role,content:x.text}))]});
+  });
+}
+async function runCloud(hist,msgObj,prompt){
+  let target=mode;
+  if(mode==='cloud-auto'){
+    document.getElementById('status-text').innerText='Gemini 3.0...';
+    try{
+      const r=await puter.ai.chat([{role:'system',content:'Responde SOLO: CODE si es código/programación, o CHAT para todo lo demás.'},{role:'user',content:prompt}],false,{model:'google/gemini-3-flash-preview',stream:false,normalize:true});
+      const txt=typeof r==='string'?r:(r?.text||r?.message?.content||'');
+      target=String(txt).toUpperCase().includes('CODE')?'google/gemini-3.6-flash':'google/gemini-3.5-flash';
+    }catch{target=/(```|html|css|js|python|sql|código|codigo|programar|error)/i.test(prompt)?'google/gemini-3.6-flash':'google/gemini-3.5-flash';}
+    msgObj.label=target.includes('3.6')?'Gemini 3.0 → 3.6 (Código)':'Gemini 3.0 → 3.5 (Común)';
+  }else{msgObj.label=(CLOUD_M.find(m=>m.id===target)?.name)||target;}
+  renderMsgs();
+  document.getElementById('status-text').innerText='Respondiendo...';
+  const msgs=[{role:'system',content:'Eres NAI, un asistente útil y claro. Responde en el idioma del usuario.'},...hist.slice(-12).map(m=>({role:m.role,content:m.text}))];
+  const resp=await puter.ai.chat(msgs,false,{model:target,stream:true,normalize:true});
+  let out='';
+  if(resp&&typeof resp[Symbol.asyncIterator]==='function'){
+    for await(const p of resp){const c=p?.text??p?.choices?.[0]?.delta?.content??'';if(c){out+=c;msgObj.text=out;const sb=document.getElementById('sb');if(sb){sb.innerHTML=fmt(out);document.getElementById('chat-box').scrollTop=999999;}}}
+  }else{out=typeof resp==='string'?resp:(resp?.text||resp?.message?.content||String(resp));}
+  return out.trim()||'Sin respuesta.';
+}
+function sendMsg(){
+  if(busy)return;
+  const inp=document.getElementById('user-input'),prompt=inp.value.trim();
+  if(!prompt)return;
+  const useCloud=hw.localBlocked||!mode.startsWith('local-');
+  if(useCloud&&!isSignedIn()){loginDirect(()=>sendMsg());return;}
+  inp.value='';inp.style.height='auto';
+  const c=getChat();if(c.title==='Nueva conversación'){c.title=prompt.slice(0,28);renderHistory();}
+  c.msgs.push({role:'user',text:prompt});
+  const hist=c.msgs.filter(m=>!m.sys),msgObj={role:'assistant',stream:true,label:'Procesando...',text:''};
+  c.msgs.push(msgObj);renderMsgs();busy=true;
+  (async()=>{t
