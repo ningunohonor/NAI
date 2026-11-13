@@ -2,8 +2,8 @@
 <html lang="es" class="dark">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>NAI - Asistente IA</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NAI v9</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://js.puter.com/v2/" async></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -11,214 +11,154 @@
 <style>
 .light body{background:#f8fafc!important;color:#0f172a!important}
 .light main{background:#f1f5f9!important}
-.light aside,.light header,.light .input-wrap,.light .modal-box{background:#fff!important;color:#0f172a!important;border-color:#cbd5e1!important}
-.light .input-box,.light #model-btn,.light .model-card{background:#e2e8f0!important;color:#0f172a!important;border-color:#cbd5e1!important}
-.light .bubble-ai{background:#fff!important;color:#0f172a!important;border:1px solid #cbd5e1!important}
-.prose-chat pre{background:#020617;color:#e2e8f0;padding:10px;border-radius:10px;overflow-x:auto;margin:6px 0;font-size:12px}
-.prose-chat code{background:rgba(16,185,129,.15);color:#34d399;padding:2px 5px;border-radius:4px;font-size:.85em}
-.prose-chat pre code{background:transparent;color:inherit;padding:0}
+.light aside,.light header,.light .iw,.light .mb{background:#fff!important;color:#0f172a!important;border-color:#cbd5e1!important}
+.light .ib,.light #mbtn,.light .mc{background:#e2e8f0!important;color:#0f172a!important;border-color:#cbd5e1!important}
+.light .ba{background:#fff!important;color:#0f172a!important;border:1px solid #cbd5e1!important}
+.pc pre{background:#020617;color:#e2e8f0;padding:10px;border-radius:10px;overflow-x:auto;margin:6px 0;font-size:12px}
+.pc code{background:rgba(16,185,129,.15);color:#34d399;padding:2px 5px;border-radius:4px;font-size:.85em}
+.pc pre code{background:transparent;color:inherit;padding:0}
 </style>
 </head>
+<!-- FIN 1 -->
 <body class="bg-slate-950 text-slate-100 h-[100dvh] w-full overflow-hidden flex antialiased">
-
-<aside id="sidebar" class="fixed md:relative inset-y-0 left-0 z-40 w-72 bg-slate-900 border-r border-white/10 flex flex-col justify-between -translate-x-full md:translate-x-0 transition-transform duration-200">
-  <div class="p-4 space-y-3 overflow-y-auto flex-1">
-    <div class="flex items-center justify-between pb-3 border-b border-white/10">
-      <div class="flex items-center space-x-2.5">
-        <div class="w-9 h-9 rounded-xl bg-emerald-400 text-slate-950 flex items-center justify-center"><i class="fa-solid fa-brain"></i></div>
-        <div><div class="font-bold text-base text-emerald-400 leading-none">NAI</div><div id="device-tag" class="text-[10px] text-slate-400 uppercase mt-1">...</div></div>
-      </div>
-      <button onclick="toggleSidebar(false)" class="md:hidden p-2 text-slate-400"><i class="fa-solid fa-xmark text-lg"></i></button>
-    </div>
-    <button onclick="newChat()" class="w-full py-2.5 px-3 rounded-xl bg-emerald-500 text-slate-950 font-bold text-xs flex items-center justify-center space-x-2"><i class="fa-solid fa-plus"></i><span>Nueva conversación</span></button>
-    <button onclick="handleAuthBtn()" class="w-full py-2.5 px-3 rounded-xl bg-white/5 border border-white/10 text-xs font-semibold flex items-center justify-between">
-      <span class="flex items-center space-x-2 truncate"><i id="auth-dot" class="fa-solid fa-circle text-[8px] text-amber-400"></i><span id="auth-label" class="truncate">Iniciar sesión (Nube)</span></span>
-      <i class="fa-solid fa-right-to-bracket text-emerald-400"></i>
-    </button>
-    <div id="hw-box" class="p-2.5 rounded-xl bg-slate-950/60 border border-white/10 text-[11px] text-slate-400 leading-snug"></div>
-    <div class="text-[10px] font-bold uppercase text-slate-500 pt-1">Historial</div>
-    <div id="history-list" class="space-y-1"></div>
-  </div>
-  <div class="p-3 border-t border-white/10">
-    <button onclick="toggleTheme()" class="w-full py-2 px-3 rounded-xl bg-white/5 text-xs font-semibold flex items-center justify-between"><span id="theme-label">Modo Oscuro</span><i class="fa-solid fa-circle-half-stroke text-emerald-400"></i></button>
-  </div>
-</aside>
-
-<main class="flex-1 flex flex-col h-full min-w-0 bg-slate-950">
-  <header class="h-14 border-b border-white/10 bg-slate-900/90 flex items-center justify-between px-3 gap-2 flex-shrink-0">
-    <div class="flex items-center space-x-2 min-w-0 flex-1">
-      <button onclick="toggleSidebar(true)" class="md:hidden p-2 text-slate-300 flex-shrink-0"><i class="fa-solid fa-bars text-lg"></i></button>
-      <button id="model-btn" onclick="openModal()" class="flex items-center space-x-2 bg-slate-800 border border-white/10 rounded-xl px-3 py-1.5 text-xs font-semibold min-w-0 truncate">
-        <span id="m-icon">✨</span><span id="m-name" class="truncate">Auto (Gemini 3.0)</span><i class="fa-solid fa-chevron-down text-[10px] text-slate-400 flex-shrink-0"></i>
-      </button>
-    </div>
-    <div class="text-[11px] font-bold text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/20 flex-shrink-0"><span id="status-text">...</span></div>
-  </header>
-
-  <div id="login-banner" class="hidden bg-amber-500/15 border-b border-amber-500/30 px-3 py-2.5 flex items-center justify-between gap-2 text-xs flex-shrink-0">
-    <span class="text-amber-200 light:text-amber-900 leading-tight">Inicia sesión gratis para usar Gemini en la nube.</span>
-    <button onclick="loginDirect()" class="px-3 py-1.5 rounded-lg bg-amber-400 text-slate-950 font-bold text-xs flex-shrink-0">🔑 Iniciar sesión</button>
-  </div>
-
-  <div id="chat-box" class="flex-1 overflow-y-auto p-3 sm:p-5 space-y-4"></div>
-
-  <div class="input-wrap p-3 bg-slate-900/90 border-t border-white/10 flex-shrink-0">
-    <div class="input-box max-w-3xl mx-auto flex items-end bg-slate-800 rounded-2xl border border-white/10 p-1.5">
-      <textarea id="user-input" rows="1" placeholder="Escribe tu mensaje..." onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMsg();}" oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,120)+'px';" class="w-full bg-transparent text-slate-100 placeholder-slate-400 px-3 py-2 text-sm focus:outline-none resize-none max-h-32"></textarea>
-      <button id="send-btn" onclick="sendMsg()" class="w-10 h-10 bg-emerald-500 hover:bg-emerald-400 text-slate-950 rounded-xl flex items-center justify-center flex-shrink-0 font-bold"><i class="fa-solid fa-arrow-up"></i></button>
-    </div>
-  </div>
-</main>
-
-<div id="model-modal" onclick="if(event.target===this)closeModal()" class="hidden fixed inset-0 z-50 bg-black/75 flex items-end sm:items-center justify-center p-0 sm:p-4">
-  <div class="modal-box w-full sm:max-w-md bg-slate-900 border border-white/10 rounded-t-3xl sm:rounded-2xl max-h-[80dvh] flex flex-col overflow-hidden">
-    <div class="p-4 border-b border-white/10 flex items-center justify-between">
-      <div><div class="font-bold text-sm">Elegir Modelo de IA</div><div id="modal-sub" class="text-[11px] text-slate-400"></div></div>
-      <button onclick="closeModal()" class="p-2 text-slate-400"><i class="fa-solid fa-xmark"></i></button>
-    </div>
-    <div id="modal-list" class="p-4 space-y-4 overflow-y-auto"></div>
-  </div>
+<aside id="sb-m" class="fixed md:relative inset-y-0 left-0 z-40 w-64 bg-slate-900 border-r border-white/10 flex flex-col justify-between -translate-x-full md:translate-x-0 transition-transform">
+<div class="p-3 space-y-2.5 overflow-y-auto flex-1">
+<div class="flex items-center justify-between pb-2 border-b border-white/10">
+<div><b class="text-emerald-400">NAI v9</b><div id="dtag" class="text-[10px] text-slate-400">...</div></div>
+<button onclick="togSb(0)" class="md:hidden p-2 text-slate-400"><i class="fa-solid fa-xmark"></i></button>
 </div>
-
+<button onclick="newChat()" class="w-full py-2 rounded-xl bg-emerald-500 text-slate-950 font-bold text-xs">+ Nueva</button>
+<button onclick="authBtn()" class="w-full py-2 px-3 rounded-xl bg-white/5 border border-white/10 text-xs flex justify-between items-center"><span id="albl">Iniciar sesión</span><i id="adot" class="fa-solid fa-circle text-[8px] text-amber-400"></i></button>
+<div id="hwbox" class="p-2 rounded-xl bg-slate-950/60 border border-white/10 text-[11px] text-slate-400"></div>
+<div id="hlist" class="space-y-1"></div>
+</div>
+<div class="p-3 border-t border-white/10"><button onclick="togTh()" class="w-full py-2 px-3 rounded-xl bg-white/5 text-xs flex justify-between"><span id="tlbl">Oscuro</span><i class="fa-solid fa-circle-half-stroke text-emerald-400"></i></button></div>
+</aside>
+<!-- FIN 2 -->
+<main class="flex-1 flex flex-col h-full min-w-0 bg-slate-950">
+<header class="h-14 border-b border-white/10 bg-slate-900/90 flex items-center justify-between px-3 gap-2 flex-shrink-0">
+<div class="flex items-center space-x-2 min-w-0 flex-1">
+<button onclick="togSb(1)" class="md:hidden p-2 text-slate-300"><i class="fa-solid fa-bars"></i></button>
+<button id="mbtn" onclick="openMod()" class="flex items-center space-x-1.5 bg-slate-800 border border-white/10 rounded-xl px-3 py-1.5 text-xs font-semibold min-w-0 truncate"><span id="mico">✨</span><span id="mnam" class="truncate">Auto</span><i class="fa-solid fa-chevron-down text-[10px]"></i></button>
+</div>
+<span id="st" class="text-[11px] font-bold text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-full">...</span>
+</header>
+<div id="lban" class="hidden bg-amber-500/15 border-b border-amber-500/30 px-3 py-2 flex items-center justify-between gap-2 text-xs">
+<span>Inicia sesión gratis para usar Gemini.</span>
+<button onclick="loginDir()" class="px-3 py-1 rounded-lg bg-amber-400 text-slate-950 font-bold">🔑 Login</button>
+</div>
+<div id="cbox" class="flex-1 overflow-y-auto p-3 space-y-3"></div>
+<!-- FIN 3 -->
+<div class="iw p-2.5 bg-slate-900/90 border-t border-white/10">
+<div class="ib max-w-3xl mx-auto flex items-end bg-slate-800 rounded-2xl border border-white/10 p-1.5">
+<textarea id="uin" rows="1" placeholder="Escribe..." onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();send();}" oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,120)+'px'" class="w-full bg-transparent px-3 py-2 text-sm focus:outline-none resize-none max-h-32"></textarea>
+<button onclick="send()" class="w-10 h-10 bg-emerald-500 text-slate-950 rounded-xl font-bold flex-shrink-0"><i class="fa-solid fa-arrow-up"></i></button>
+</div></div></main>
+<div id="mmod" onclick="if(event.target===this)closeMod()" class="hidden fixed inset-0 z-50 bg-black/75 flex items-end sm:items-center justify-center sm:p-4">
+<div class="mb w-full sm:max-w-md bg-slate-900 border border-white/10 rounded-t-3xl sm:rounded-2xl max-h-[80dvh] flex flex-col overflow-hidden">
+<div class="p-3 border-b border-white/10 flex justify-between items-center"><div><b class="text-sm">Elegir Modelo</b><div id="msub" class="text-[11px] text-slate-400"></div></div><button onclick="closeMod()" class="p-2"><i class="fa-solid fa-xmark"></i></button></div>
+<div id="mlist" class="p-3 space-y-3 overflow-y-auto"></div>
+</div></div>
+<!-- FIN 4 -->
 <script>
-window.onerror=function(m,u,l){document.getElementById('status-text').innerText='Error';document.getElementById('chat-box').innerHTML+='<div class="p-3 rounded-xl bg-rose-500/20 border border-rose-500 text-xs text-rose-200">Línea '+l+': '+m+'</div>';};
-setTimeout(function(){if(!window.__NAI_OK){document.getElementById('status-text').innerText='Incompleto';document.getElementById('chat-box').innerHTML='<div class="p-4 rounded-xl bg-rose-500/20 border border-rose-500 text-xs text-rose-200">⚠️ El archivo index.html se copió incompleto (faltó el final del código).</div>';}},1500);
-</script>
-
-<script>
-window.__NAI_OK=true;
-const LOCAL_M=[
-  {id:'local-auto',icon:'⚡',name:'Auto PC (Tu procesador)',desc:'Ajustado a tu PC. Sin login.',tag:'Sin Login'},
-  {id:'local-high',icon:'🧠',name:'Qwen 2.5 0.5B (PC Potente)',desc:'Buen español local.',tag:'Sin Login'},
-  {id:'local-medium',icon:'⚙️',name:'SmolLM2 360M (PC Media)',desc:'Ligero para CPU.',tag:'Sin Login'}
-];
-const CLOUD_M=[
-  {id:'cloud-auto',icon:'✨',name:'Auto (Gemini 3.0)',desc:'3.5 para común y 3.6 para código.',tag:'Recomendado'},
-  {id:'google/gemini-3.5-flash',icon:'💬',name:'Gemini 3.5 Flash',desc:'Respuestas comunes.',tag:'Común'},
-  {id:'google/gemini-3.6-flash',icon:'💻',name:'Gemini 3.6 Flash',desc:'Especialista en código.',tag:'Código'},
-  {id:'google/gemini-3-flash-preview',icon:'🧭',name:'Gemini 3.0 Flash',desc:'Directo.',tag:'Nube'},
-  {id:'google/gemini-3.8-flash',icon:'⚡',name:'Gemini 3.8 Flash',desc:'Rápido avanzado.',tag:'Nube'},
-  {id:'google/gemini-4-hydrogen',icon:'🌟',name:'Gemini 4 Hydrogen',desc:'Uso diario avanzado.',tag:'Avanzado'},
-  {id:'google/gemini-4-argon',icon:'🧬',name:'Gemini 4 Argon',desc:'Razonamiento e ingeniería.',tag:'Avanzado'},
-  {id:'google/gemini-4-carbon',icon:'💎',name:'Gemini 4 Carbon',desc:'Máxima potencia Google.',tag:'Top'},
-  {id:'gpt-6-luna',icon:'🤖',name:'GPT-6 Luna',desc:'OpenAI avanzado.',tag:'Avanzado'},
-  {id:'claude-opus-4-8',icon:'🟣',name:'Claude Opus 4.8',desc:'Anthropic avanzado.',tag:'Avanzado'}
-];
-let chats=[],activeId=null,busy=false,mode='cloud-auto',worker=null,hw={isMobile:true,localBlocked:true,cores:2,ram:null,gpu:false,tier:'cloud'};
-const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-function fmt(t){const b=[];let x=String(t).replace(/```[\w-]*\n?([\s\S]*?)```/g,(_,c)=>{b.push('<pre><code>'+esc(c.trimEnd())+'</code></pre>');return'@@B'+(b.length-1)+'@@';});x=esc(x).replace(/`([^`\n]+)`/g,'<code>$1</code>').replace(/\*\*([^*\n]+)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>');b.forEach((h,i)=>x=x.replace('@@B'+i+'@@',h));return x;}
-const getLS=k=>{try{return localStorage.getItem(k)}catch{return null}};
-const setLS=(k,v)=>{try{localStorage.setItem(k,v)}catch{}};
-const isSignedIn=()=>{try{return typeof puter!=='undefined'&&puter.auth&&puter.auth.isSignedIn()}catch{return false}};
-
+var BT3=String.fromCharCode(96,96,96),BT1=String.fromCharCode(96),wk=null,chats=[],aid=null,busy=0,mode='cloud-auto';
+var hw={mob:1,blk:1,cor:2,ram:null,gpu:0,tier:'cloud'};
+var LM=[{id:'local-auto',i:'⚡',n:'Auto PC',d:'Ajustado a tu PC'},{id:'local-high',i:'🧠',n:'Qwen 2.5 0.5B',d:'PC Potente'},{id:'local-medium',i:'⚙️',n:'SmolLM2 360M',d:'PC Media'}];
+var CM=[{id:'cloud-auto',i:'✨',n:'Auto (Gemini 3.0)',d:'3.5 común / 3.6 código'},{id:'google/gemini-3.5-flash',i:'💬',n:'Gemini 3.5 Flash',d:'Respuestas comunes'},{id:'google/gemini-3.6-flash',i:'💻',n:'Gemini 3.6 Flash',d:'Código'},{id:'google/gemini-3-flash-preview',i:'🧭',n:'Gemini 3.0 Flash',d:'Directo'},{id:'google/gemini-3.8-flash',i:'⚡',n:'Gemini 3.8 Flash',d:'Rápido avanzado'},{id:'google/gemini-4-hydrogen',i:'🌟',n:'Gemini 4 Hydrogen',d:'Diario avanzado'},{id:'google/gemini-4-argon',i:'🧬',n:'Gemini 4 Argon',d:'Ingeniería'},{id:'google/gemini-4-carbon',i:'💎',n:'Gemini 4 Carbon',d:'Top Google'},{id:'gpt-6-luna',i:'🤖',n:'GPT-6 Luna',d:'OpenAI'},{id:'claude-opus-4-8',i:'🟣',n:'Claude Opus 4.8',d:'Anthropic'}];
+function isIn(){try{return typeof puter!=='undefined'&&puter.auth&&puter.auth.isSignedIn();}catch(e){return 0;}}
+/* FIN 5 */
 function detectHW(){
-  const ua=navigator.userAgent||'';
-  const isMobile=/Android|webOS|iPhone|iPad|iPod|Mobile|Tablet/i.test(ua)||(navigator.maxTouchPoints>0&&innerWidth<=1024);
-  const cores=navigator.hardwareConcurrency||2;
-  const ram=typeof navigator.deviceMemory==='number'?navigator.deviceMemory:null;
-  let bench=999;
-  if(!isMobile){const t0=performance.now();let a=0;for(let i=1;i<=1200000;i++)a+=Math.sqrt(i);if(a<0)console.log(a);bench=Math.round(performance.now()-t0);}
-  const localBlocked=isMobile||(ram!==null&&ram<4)||cores<=2||bench>=75;
-  const tier=localBlocked?'cloud':(cores>=8&&(ram===null||ram>=8)&&bench<40?'high':'medium');
-  hw={isMobile,localBlocked,cores,ram,gpu:false,tier};
+  var ua=navigator.userAgent||'';
+  var mob=/Android|webOS|iPhone|iPad|iPod|Mobile|Tablet/i.test(ua)||(navigator.maxTouchPoints>0&&innerWidth<=1024);
+  var cor=navigator.hardwareConcurrency||2,ram=typeof navigator.deviceMemory==='number'?navigator.deviceMemory:null,b=999;
+  if(!mob){var t0=performance.now(),a=0;for(var i=1;i<=1200000;i++)a+=Math.sqrt(i);if(a<0)console.log(a);b=Math.round(performance.now()-t0);}
+  var blk=mob||(ram!==null&&ram<4)||cor<=2||b>=75;
+  var tier=blk?'cloud':(cor>=8&&(ram===null||ram>=8)&&b<40?'high':'medium');
+  hw={mob:mob,blk:blk,cor:cor,ram:ram,gpu:0,tier:tier};
 }
-function updateUI(){
-  if(hw.localBlocked&&mode.startsWith('local-'))mode='cloud-auto';
-  const all=hw.localBlocked?CLOUD_M:[...LOCAL_M,...CLOUD_M];
-  const info=all.find(m=>m.id===mode)||CLOUD_M[0];
-  mode=info.id;
-  document.getElementById('m-icon').innerText=info.icon;
-  document.getElementById('m-name').innerText=info.name;
-  document.getElementById('device-tag').innerText=hw.isMobile?'Celular · Nube':(hw.localBlocked?'PC Justa · Nube':'PC · Local/Nube');
-  document.getElementById('hw-box').innerHTML=hw.isMobile?'📱 <b>Celular:</b> IA local desactivada. Usa la nube con sesión.':(hw.localBlocked?'💻 <b>PC Justa:</b> Usa la nube para no trabarse.':'🖥️ <b>PC Lista ('+hw.cores+' hilos):</b> Local o Nube.');
-  const s=isSignedIn();
-  document.getElementById('auth-dot').className='fa-solid fa-circle text-[8px] '+(s?'text-emerald-400':'text-amber-400');
-  document.getElementById('auth-label').innerText=s?'Sesión activa':'Iniciar sesión (Nube)';
-  document.getElementById('login-banner').classList.toggle('hidden',s||mode.startsWith('local-'));
-  document.getElementById('status-text').innerText=mode.startsWith('local-')?'Local PC':(s?'Nube Activa':'Falta Login');
+function upd(){
+  if(hw.blk&&mode.indexOf('local-')===0)mode='cloud-auto';
+  var all=hw.blk?CM:LM.concat(CM),info=all.find(function(x){return x.id===mode;})||CM[0];mode=info.id;
+  document.getElementById('mico').innerText=info.i;document.getElementById('mnam').innerText=info.n;
+  document.getElementById('dtag').innerText=hw.mob?'Celular · Nube':(hw.blk?'PC Justa · Nube':'PC · Local/Nube');
+  document.getElementById('hwbox').innerHTML=hw.mob?'📱 Celular: solo Nube.':(hw.blk?'💻 PC Justa: solo Nube.':'🖥️ PC ('+hw.cor+' hilos): Local o Nube.');
+  var s=isIn();
+  document.getElementById('adot').className='fa-solid fa-circle text-[8px] '+(s?'text-emerald-400':'text-amber-400');
+  document.getElementById('albl').innerText=s?'Sesión activa':'Iniciar sesión';
+  document.getElementById('lban').classList.toggle('hidden',s||mode.indexOf('local-')===0);
+  document.getElementById('st').innerText=mode.indexOf('local-')===0?'Local':(s?'Nube':'Login');
 }
-function toggleSidebar(o){document.getElementById('sidebar').classList.toggle('-translate-x-full',!o);}
-function toggleTheme(){const d=!document.documentElement.classList.contains('dark');document.documentElement.classList.toggle('dark',d);document.documentElement.classList.toggle('light',!d);document.getElementById('theme-label').innerText=d?'Modo Oscuro':'Modo Claro';setLS('nai_v6_t',d?'dark':'light');}
-function openModal(){
-  document.getElementById('modal-sub').innerText=hw.localBlocked?'Solo modelos en la nube para este equipo.':'Elige Local (sin login) o Nube (con login).';
-  const card=m=>'<button onclick="pickModel(\''+m.id+'\')" class="model-card w-full text-left p-3 rounded-xl border flex justify-between items-start gap-2 '+(m.id===mode?'bg-emerald-500/15 border-emerald-500':'bg-slate-800 border-white/10')+'"><div class="flex space-x-2.5 min-w-0"><span class="text-lg">'+m.icon+'</span><div class="min-w-0"><div class="text-xs font-bold truncate">'+esc(m.name)+'</div><div class="text-[11px] text-slate-400">'+esc(m.desc)+'</div></div></div><span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-white/10 flex-shrink-0">'+m.tag+'</span></button>';
-  let h='';
-  if(!hw.localBlocked)h+='<div><div class="text-[10px] font-bold uppercase text-slate-400 mb-2">🖥️ En tu PC (Sin Login)</div><div class="space-y-2">'+LOCAL_M.map(card).join('')+'</div></div>';
-  h+='<div><div class="text-[10px] font-bold uppercase text-slate-400 mb-2">☁️ En la Nube (Requiere Sesión)</div><div class="space-y-2">'+CLOUD_M.map(card).join('')+'</div></div>';
-  document.getElementById('modal-list').innerHTML=h;
-  document.getElementById('model-modal').classList.remove('hidden');
+/* FIN 6 */
+function togSb(o){document.getElementById('sb-m').classList.toggle('-translate-x-full',!o);}
+function togTh(){var d=!document.documentElement.classList.contains('dark');document.documentElement.classList.toggle('dark',d);document.documentElement.classList.toggle('light',!d);document.getElementById('tlbl').innerText=d?'Oscuro':'Claro';setLS('nai9t',d?'dark':'light');}
+function openMod(){
+  document.getElementById('msub').innerText=hw.blk?'Solo modelos en la nube.':'Local (sin login) o Nube (con login).';
+  function card(m){return '<button onclick="pick(\''+m.id+'\')" class="mc w-full text-left p-2.5 rounded-xl border flex items-center gap-2.5 '+(m.id===mode?'bg-emerald-500/15 border-emerald-500':'bg-slate-800 border-white/10')+'"><span class="text-lg">'+m.i+'</span><div><div class="text-xs font-bold">'+esc(m.n)+'</div><div class="text-[11px] text-slate-400">'+esc(m.d)+'</div></div></button>';}
+  var h=hw.blk?'':'<div class="text-[10px] font-bold uppercase text-slate-400">🖥️ En tu PC</div>'+LM.map(card).join('');
+  h+='<div class="text-[10px] font-bold uppercase text-slate-400 mt-2">☁️ En la Nube</div>'+CM.map(card).join('');
+  document.getElementById('mlist').innerHTML=h;document.getElementById('mmod').classList.remove('hidden');
 }
-function closeModal(){document.getElementById('model-modal').classList.add('hidden');}
-function pickModel(id){mode=id;setLS('nai_v6_m',mode);updateUI();closeModal();}
-function loginDirect(cb){
-  if(typeof puter==='undefined'||!puter.auth){addMsg('assistant','⚠️ **Puter.js no ha cargado aún.** Revisa tu internet o bloqueadores de anuncios.','Aviso');return;}
-  document.getElementById('status-text').innerText='Abriendo login...';
-  puter.auth.signIn().then(()=>{updateUI();if(cb)cb();}).catch(e=>{updateUI();const msg=e?.message||e?.error||JSON.stringify(e);if(!String(msg).includes('auth_window_closed'))addMsg('assistant','⚠️ **Login:** '+msg,'Aviso');});
+function closeMod(){document.getElementById('mmod').classList.add('hidden');}
+function pick(id){mode=id;setLS('nai9m',mode);upd();closeMod();}
+function loginDir(cb){
+  if(typeof puter==='undefined'||!puter.auth){addM('assistant','⚠️ Puter.js aún cargando o bloqueado.','Aviso');return;}
+  document.getElementById('st').innerText='Login...';
+  puter.auth.signIn().then(function(){upd();if(cb)cb();}).catch(function(e){upd();var m=(e&&(e.message||e.error))||JSON.stringify(e);if(String(m).indexOf('closed')===-1)addM('assistant','⚠️ '+m,'Aviso');});
 }
-function handleAuthBtn(){if(isSignedIn()){if(confirm('¿Cerrar sesión?')){puter.auth.signOut();updateUI();}}else loginDirect();}
-function newChat(){
-  if(busy)return;
-  const id='c_'+Date.now();
-  const txt=hw.localBlocked?'👋 ¡Hola! Toca **🔑 Iniciar sesión** arriba para activar Gemini 3.0 / 3.5 / 3.6 y modelos avanzados.':'🖥️ ¡Hola! Tu PC soporta ejecución local sin login o modelos avanzados en la nube.';
-  chats.unshift({id,title:'Nueva conversación',msgs:[{role:'assistant',sys:true,label:'NAI',text:txt}]});
-  activeId=id;saveChats();renderHistory();renderMsgs();toggleSidebar(false);
-}
-const getChat=()=>chats.find(c=>c.id===activeId)||chats[0];
-const saveChats=()=>setLS('nai_v6_c',JSON.stringify(chats));
-function addMsg(role,text,label){getChat().msgs.push({role,text,label,sys:role==='assistant'&&label==='Aviso'});saveChats();renderMsgs();}
-function renderHistory(){document.getElementById('history-list').innerHTML=chats.map(c=>'<div onclick="activeId=\''+c.id+'\';renderHistory();renderMsgs();toggleSidebar(false)" class="p-2 rounded-lg text-xs truncate cursor-pointer '+(c.id===activeId?'bg-emerald-500/20 text-emerald-400':'text-slate-400')+'">'+esc(c.title)+'</div>').join('');}
-function renderMsgs(){
-  const b=document.getElementById('chat-box');
-  b.innerHTML=getChat().msgs.map(m=>m.role==='user'
-    ?'<div class="flex justify-end"><div class="max-w-[85%] bg-emerald-500 text-slate-950 font-medium px-4 py-2.5 rounded-2xl rounded-tr-none text-sm">'+fmt(m.text)+'</div></div>'
-    :'<div class="flex justify-start"><div class="bubble-ai prose-chat max-w-[90%] bg-slate-900 border border-white/10 px-4 py-3 rounded-2xl rounded-tl-none text-sm">'+(m.label?'<div class="text-[10px] font-bold text-emerald-400 uppercase mb-1">'+esc(m.label)+'</div>':'')+'<div '+(m.stream?'id="sb"':'')+'>'+(m.text?fmt(m.text):'<i class="fa-solid fa-circle-notch fa-spin text-emerald-400 mr-2"></i>Pensando...')+'</div></div></div>'
-  ).join('');
-  b.scrollTop=b.scrollHeight;
-}
-function runLocal(hist,msgObj){
-  return new Promise((res,rej)=>{
-    if(!worker){
-      const code="import {pipeline,TextStreamer,env} from 'https://cdn.jsdelivr.net/npm/@huggingface/transformers';const c=new Map();self.onmessage=async e=>{const{id,m,d,msgs,max}=e.data;try{if(env?.backends?.onnx?.wasm)env.backends.onnx.wasm.numThreads=1;let g=c.get(m);if(!g){g=await pipeline('text-generation',m,{device:d,dtype:'q4',progress_callback:p=>{if(p.status==='progress')self.postMessage({id,ev:'p',p:Math.round(p.progress)})}});c.set(m,g);}let o='';const s=new TextStreamer(g.tokenizer,{skip_prompt:true,skip_special_tokens:true,callback_function:t=>{o+=t;self.postMessage({id,ev:'t',t:o})}});await g(msgs,{max_new_tokens:max,do_sample:true,temperature:0.65,streamer:s});self.postMessage({id,ev:'d',t:o.trim()})}catch(err){self.postMessage({id,ev:'e',e:err.message||String(err)})}};";
-      worker=new Worker(URL.createObjectURL(new Blob([code],{type:'application/javascript'})),{type:'module'});
+function authBtn(){if(isIn()){if(confirm('¿Cerrar sesión?')){puter.auth.signOut();upd();}}else loginDir();}
+/* FIN 7 */
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function fmt(t){var b=[],rB=new RegExp(BT3+'[\\w-]*\\n?([\\s\\S]*?)'+BT3,'g'),rI=new RegExp(BT1+'([^'+BT1+'\\n]+)'+BT1,'g'),x=String(t).replace(rB,function(_,c){b.push('<pre><code>'+esc(c.replace(/\s+$/,''))+'</code></pre>');return'@@'+((b.length)-1)+'@@';});x=esc(x).replace(rI,'<code>$1</code>').replace(/\*\*([^*\n]+)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>');for(var i=0;i<b.length;i++)x=x.replace('@@'+i+'@@',b[i]);return x;}
+function getLS(k){try{return localStorage.getItem(k);}catch(e){return null;}}
+function setLS(k,v){try{localStorage.setItem(k,v);}catch(e){}}
+function newChat(){if(busy)return;var id='c'+Date.now(),t=hw.blk?'👋 Toca **🔑 Login** arriba para activar Gemini 3.0 / 3.5 / 3.6.':'🖥️ PC lista para IA local sin login o Nube.';chats.unshift({id:id,t:'Nueva',m:[{r:'assistant',s:1,l:'NAI v9',t:t}]});aid=id;saveC();renH();renM();togSb(0);}
+function selC(id){aid=id;renH();renM();togSb(0);}
+function getC(){return chats.find(function(c){return c.id===aid;})||chats[0];}
+function saveC(){setLS('nai9c',JSON.stringify(chats));}
+function addM(r,t,l){getC().m.push({r:r,t:t,l:l,s:r==='assistant'&&l==='Aviso'});saveC();renM();}
+function renH(){document.getElementById('hlist').innerHTML=chats.map(function(c){return '<div onclick="selC(\''+c.id+'\')" class="p-2 rounded-lg text-xs truncate cursor-pointer '+(c.id===aid?'bg-emerald-500/20 text-emerald-400':'text-slate-400')+'">'+esc(c.t)+'</div>';}).join('');}
+function renM(){var b=document.getElementById('cbox');b.innerHTML=getC().m.map(function(x){return x.r==='user'?'<div class="flex justify-end"><div class="max-w-[85%] bg-emerald-500 text-slate-950 font-medium px-3 py-2 rounded-2xl text-sm">'+fmt(x.t)+'</div></div>':'<div class="flex justify-start"><div class="ba pc max-w-[90%] bg-slate-900 border border-white/10 px-3 py-2.5 rounded-2xl text-sm">'+(x.l?'<div class="text-[10px] font-bold text-emerald-400 uppercase mb-1">'+esc(x.l)+'</div>':'')+'<div '+(x.st?'id="sb"':'')+'>'+(x.t?fmt(x.t):'Pensando...')+'</div></div></div>';}).join('');b.scrollTop=b.scrollHeight;}
+/* FIN 8 */
+function runLocal(hist,mo){
+  return new Promise(function(res,rej){
+    if(!wk){
+      var c="import {pipeline,TextStreamer,env} from 'https://cdn.jsdelivr.net/npm/@huggingface/transformers';const c=new Map();self.onmessage=async e=>{const{id,m,d,msgs,max}=e.data;try{if(env?.backends?.onnx?.wasm)env.backends.onnx.wasm.numThreads=1;let g=c.get(m);if(!g){g=await pipeline('text-generation',m,{device:d,dtype:'q4',progress_callback:p=>{if(p.status==='progress')self.postMessage({id,ev:'p',p:Math.round(p.progress)})}});c.set(m,g);}let o='';const s=new TextStreamer(g.tokenizer,{skip_prompt:true,skip_special_tokens:true,callback_function:t=>{o+=t;self.postMessage({id,ev:'t',t:o})}});await g(msgs,{max_new_tokens:max,do_sample:true,temperature:0.65,streamer:s});self.postMessage({id,ev:'d',t:o.trim()})}catch(err){self.postMessage({id,ev:'e',e:err.message||String(err)})}};";
+      wk=new Worker(URL.createObjectURL(new Blob([c],{type:'application/javascript'})),{type:'module'});
     }
-    const high=mode==='local-high'||(mode==='local-auto'&&hw.tier==='high');
-    const m=high?'onnx-community/Qwen2.5-0.5B-Instruct':'onnx-community/SmolLM2-360M-Instruct-ONNX';
-    const id='r'+Date.now();
-    const fn=e=>{const d=e.data;if(!d||d.id!==id)return;if(d.ev==='p'){msgObj.text='*Descargando: '+d.p+'%*';renderMsgs();}else if(d.ev==='t'){msgObj.text=d.t;const sb=document.getElementById('sb');if(sb){sb.innerHTML=fmt(d.t);document.getElementById('chat-box').scrollTop=999999;}}else if(d.ev==='d'){worker.removeEventListener('message',fn);res(d.t||'Sin respuesta.');}else if(d.ev==='e'){worker.removeEventListener('message',fn);rej(new Error(d.e));}};
-    worker.addEventListener('message',fn);
-    worker.postMessage({id,m,d:hw.gpu?'webgpu':'wasm',max:high?300:180,msgs:[{role:'system',content:'You are NAI. Answer in the user language.'},...hist.slice(-4).map(x=>({role:x.role,content:x.text}))]});
+    var hi=mode==='local-high'||(mode==='local-auto'&&hw.tier==='high'),m=hi?'onnx-community/Qwen2.5-0.5B-Instruct':'onnx-community/SmolLM2-360M-Instruct-ONNX',id='r'+Date.now();
+    var fn=function(e){var d=e.data;if(!d||d.id!==id)return;if(d.ev==='p'){mo.t='Descargando: '+d.p+'%';renM();}else if(d.ev==='t'){mo.t=d.t;var s=document.getElementById('sb');if(s){s.innerHTML=fmt(d.t);document.getElementById('cbox').scrollTop=999999;}}else if(d.ev==='d'){wk.removeEventListener('message',fn);res(d.t||'Sin respuesta.');}else if(d.ev==='e'){wk.removeEventListener('message',fn);rej(new Error(d.e));}};
+    wk.addEventListener('message',fn);
+    wk.postMessage({id:id,m:m,d:hw.gpu?'webgpu':'wasm',max:hi?300:180,msgs:[{role:'system',content:'You are NAI. Answer in user language.'}].concat(hist.slice(-4).map(function(x){return{role:x.r,content:x.t};}))});
   });
 }
-async function runCloud(hist,msgObj,prompt){
-  let target=mode;
+/* FIN 9 */
+async function runCloud(hist,mo,p){
+  var tg=mode;
   if(mode==='cloud-auto'){
-    document.getElementById('status-text').innerText='Gemini 3.0...';
-    try{
-      const r=await puter.ai.chat([{role:'system',content:'Responde SOLO: CODE si es código/programación, o CHAT para todo lo demás.'},{role:'user',content:prompt}],false,{model:'google/gemini-3-flash-preview',stream:false,normalize:true});
-      const txt=typeof r==='string'?r:(r?.text||r?.message?.content||'');
-      target=String(txt).toUpperCase().includes('CODE')?'google/gemini-3.6-flash':'google/gemini-3.5-flash';
-    }catch{target=/(```|html|css|js|python|sql|código|codigo|programar|error)/i.test(prompt)?'google/gemini-3.6-flash':'google/gemini-3.5-flash';}
-    msgObj.label=target.includes('3.6')?'Gemini 3.0 → 3.6 (Código)':'Gemini 3.0 → 3.5 (Común)';
-  }else{msgObj.label=(CLOUD_M.find(m=>m.id===target)?.name)||target;}
-  renderMsgs();
-  document.getElementById('status-text').innerText='Respondiendo...';
-  const msgs=[{role:'system',content:'Eres NAI, un asistente útil y claro. Responde en el idioma del usuario.'},...hist.slice(-12).map(m=>({role:m.role,content:m.text}))];
-  const resp=await puter.ai.chat(msgs,false,{model:target,stream:true,normalize:true});
-  let out='';
-  if(resp&&typeof resp[Symbol.asyncIterator]==='function'){
-    for await(const p of resp){const c=p?.text??p?.choices?.[0]?.delta?.content??'';if(c){out+=c;msgObj.text=out;const sb=document.getElementById('sb');if(sb){sb.innerHTML=fmt(out);document.getElementById('chat-box').scrollTop=999999;}}}
-  }else{out=typeof resp==='string'?resp:(resp?.text||resp?.message?.content||String(resp));}
+    document.getElementById('st').innerText='Gemini 3.0...';
+    try{var r=await puter.ai.chat([{role:'system',content:'Responde SOLO: CODE si es código, o CHAT para todo lo demás.'},{role:'user',content:p}],false,{model:'google/gemini-3-flash-preview',stream:false,normalize:true});var tx=typeof r==='string'?r:((r&&r.text)||(r&&r.message&&r.message.content)||'');tg=String(tx).toUpperCase().indexOf('CODE')!==-1?'google/gemini-3.6-flash':'google/gemini-3.5-flash';}catch(e){tg=/(html|css|js|python|sql|código|codigo|programar|error)/i.test(p)?'google/gemini-3.6-flash':'google/gemini-3.5-flash';}
+    mo.l=tg.indexOf('3.6')!==-1?'Gemini 3.0 → 3.6 (Código)':'Gemini 3.0 → 3.5 (Común)';
+  }else{mo.l=(CM.find(function(x){return x.id===tg;})||{}).n||tg;}
+  renM();document.getElementById('st').innerText='Escribiendo...';
+  var msgs=[{role:'system',content:'Eres NAI, asistente claro y útil. Responde en el idioma del usuario.'}].concat(hist.slice(-12).map(function(x){return{role:x.r,content:x.t};}));
+  var resp=await puter.ai.chat(msgs,false,{model:tg,stream:true,normalize:true}),out='';
+  if(resp&&typeof resp[Symbol.asyncIterator]==='function'){for await(var pt of resp){var ch=(pt&&pt.text)||(pt&&pt.choices&&pt.choices[0]&&pt.choices[0].delta&&pt.choices[0].delta.content)||'';if(ch){out+=ch;mo.t=out;var s=document.getElementById('sb');if(s){s.innerHTML=fmt(out);document.getElementById('cbox').scrollTop=999999;}}}}else{out=typeof resp==='string'?resp:((resp&&resp.text)||(resp&&resp.message&&resp.message.content)||String(resp));}
   return out.trim()||'Sin respuesta.';
 }
-function sendMsg(){
-  if(busy)return;
-  const inp=document.getElementById('user-input'),prompt=inp.value.trim();
-  if(!prompt)return;
-  const useCloud=hw.localBlocked||!mode.startsWith('local-');
-  if(useCloud&&!isSignedIn()){loginDirect(()=>sendMsg());return;}
-  inp.value='';inp.style.height='auto';
-  const c=getChat();if(c.title==='Nueva conversación'){c.title=prompt.slice(0,28);renderHistory();}
-  c.msgs.push({role:'user',text:prompt});
-  const hist=c.msgs.filter(m=>!m.sys),msgObj={role:'assistant',stream:true,label:'Procesando...',text:''};
-  c.msgs.push(msgObj);renderMsgs();busy=true;
-  (async()=>{t
+function send(){
+  if(busy)return;var u=document.getElementById('uin'),p=u.value.trim();if(!p)return;
+  var uc=hw.blk||mode.indexOf('local-')!==0;if(uc&&!isIn()){loginDir(function(){send();});return;}
+  u.value='';u.style.height='auto';var c=getC();if(c.t==='Nueva'){c.t=p.slice(0,25);renH();}
+  c.m.push({r:'user',t:p});var hist=c.m.filter(function(x){return!x.s;}),mo={r:'assistant',st:1,l:'...',t:''};c.m.push(mo);renM();busy=1;
+  (async function(){try{mo.t=uc?await runCloud(hist,mo,p):await runLocal(hist,mo);}catch(e){mo.s=1;mo.l='Aviso';mo.t='⚠️ '+((e&&(e.message||e.error))||JSON.stringify(e));}finally{delete mo.st;busy=0;upd();saveC();renM();}})();
+}
+(function(){
+  detectHW();try{chats=JSON.parse(getLS('nai9c')||'[]');}catch(e){chats=[];}
+  var sm=getLS('nai9m');if(sm)mode=sm;if(getLS('nai9t')==='light')togTh();
+  if(!chats.length)newChat();else{aid=chats[0].id;renH();renM();}upd();
+  var t=0,iv=setInterval(function(){t++;if(typeof puter!=='undefined'||t>25){clearInterval(iv);upd();}},300);
+  if(!hw.mob&&navigator.gpu)navigator.gpu.requestAdapter().then(function(a){hw.gpu=Boolean(a);if(hw.gpu&&!hw.blk)hw.tier='high';upd();}).catch(function(){});
+})();
+</script>
+</body>
+</html>
