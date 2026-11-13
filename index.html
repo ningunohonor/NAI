@@ -2,320 +2,267 @@
 <html lang="es" class="dark">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
     <title>NAI - Asistente IA</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://js.puter.com/v2/"></script>
+    <script src="https://js.puter.com/v2/" async></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: { extend: { fontFamily: { sans: ['Plus Jakarta Sans', 'sans-serif'] } } }
-        }
-    </script>
+    <script>tailwind.config = { darkMode: 'class' };</script>
     <style>
-        body { font-family: 'Plus Jakarta Sans', sans-serif; }
-        .glass-panel {
-            background: rgba(15, 23, 42, 0.85);
-            backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-        }
-        .light .glass-panel {
-            background: rgba(255, 255, 255, 0.96);
-            border: 1px solid rgba(0, 0, 0, 0.12);
-        }
-        .custom-scrollbar::-webkit-scrollbar { width: 5px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.25); border-radius: 10px; }
-        .light body { background-color: #f8fafc !important; color: #0f172a !important; }
-        .light main { background-color: #f1f5f9 !important; }
-        .light aside { background-color: #ffffff !important; color: #0f172a !important; }
-        .light header, .light .input-wrapper { background-color: rgba(255, 255, 255, 0.96) !important; border-color: #e2e8f0 !important; }
-        .light .input-box { background-color: #e2e8f0 !important; border-color: #cbd5e1 !important; }
-        .light #user-input { color: #0f172a !important; }
-        .light #model-picker-btn { background-color: #e2e8f0 !important; color: #0f172a !important; border-color: #cbd5e1 !important; }
-        .light .hw-card, .light .modal-surface { background-color: #ffffff !important; border-color: #cbd5e1 !important; color: #0f172a !important; }
-        .light .model-item { background-color: #f8fafc !important; border-color: #cbd5e1 !important; color: #0f172a !important; }
-        .light .chat-assistant-bubble { background-color: #ffffff !important; color: #0f172a !important; border: 1px solid #cbd5e1 !important; }
-        .light .chat-user-bubble { background: linear-gradient(135deg, #059669 0%, #10b981 100%) !important; color: #ffffff !important; }
-        .prose-chat pre {
-            background: #020617; color: #e2e8f0; padding: 0.85rem 1rem;
-            border-radius: 0.75rem; overflow-x: auto; margin: 0.6rem 0; font-size: 0.8rem;
-        }
-        .prose-chat code {
-            background: rgba(16, 185, 129, 0.15); color: #34d399;
-            padding: 0.1rem 0.35rem; border-radius: 0.35rem; font-size: 0.85em;
-        }
-        .light .prose-chat code { background: rgba(5, 150, 105, 0.12); color: #047857; }
+        .light body { background: #f8fafc !important; color: #0f172a !important; }
+        .light main { background: #f1f5f9 !important; }
+        .light aside, .light header, .light .input-wrap, .light .modal-box { background: #ffffff !important; color: #0f172a !important; border-color: #cbd5e1 !important; }
+        .light .input-box, .light #model-btn, .light .model-card { background: #e2e8f0 !important; color: #0f172a !important; border-color: #cbd5e1 !important; }
+        .light .bubble-ai { background: #ffffff !important; color: #0f172a !important; border: 1px solid #cbd5e1 !important; }
+        .prose-chat pre { background: #020617; color: #e2e8f0; padding: 10px 12px; border-radius: 10px; overflow-x: auto; margin: 8px 0; font-size: 12px; }
+        .prose-chat code { background: rgba(16,185,129,.15); color: #34d399; padding: 2px 5px; border-radius: 4px; font-size: .85em; }
         .prose-chat pre code { background: transparent; color: inherit; padding: 0; }
     </style>
 </head>
-<body class="bg-slate-950 text-slate-100 transition-colors duration-300 min-h-screen flex flex-col antialiased">
+<body class="bg-slate-950 text-slate-100 h-[100dvh] w-full overflow-hidden flex antialiased">
 
-    <div class="flex h-screen overflow-hidden relative z-10">
-        <!-- Sidebar -->
-        <aside id="sidebar" class="fixed md:relative inset-y-0 left-0 z-40 w-72 glass-panel flex-shrink-0 flex flex-col justify-between -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out">
-            <div class="flex flex-col flex-1 overflow-hidden">
-                <div class="p-5 flex items-center justify-between border-b border-white/5">
-                    <div class="flex items-center space-x-3">
-                        <div class="w-10 h-10 rounded-2xl bg-emerald-400 flex items-center justify-center text-slate-950 shadow-lg">
-                            <i class="fa-solid fa-brain text-xl"></i>
-                        </div>
-                        <div>
-                            <h1 class="font-bold text-lg tracking-tight bg-gradient-to-r from-emerald-400 to-indigo-500 bg-clip-text text-transparent">NAI</h1>
-                            <span id="device-tag" class="text-[10px] font-semibold text-emerald-400 uppercase tracking-wider">Detectando...</span>
-                        </div>
-                    </div>
-                    <button onclick="closeSidebar()" class="md:hidden text-slate-400 p-2 rounded-xl hover:bg-white/10">
-                        <i class="fa-solid fa-xmark text-xl"></i>
-                    </button>
-                </div>
-
-                <div class="p-4 space-y-2.5">
-                    <button onclick="createNewChat()" class="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 text-slate-950 font-bold text-sm shadow-lg flex items-center justify-center space-x-2">
-                        <i class="fa-solid fa-plus text-xs"></i>
-                        <span>Nueva conversación</span>
-                    </button>
-
-                    <button id="puter-auth-btn" onclick="handleAuthButtonClick()" class="w-full py-2.5 px-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-semibold flex items-center justify-between transition-colors">
-                        <span class="flex items-center space-x-2 truncate">
-                            <i id="puter-auth-dot" class="fa-solid fa-circle text-[8px] text-amber-400"></i>
-                            <span id="puter-auth-text" class="truncate">Iniciar sesión (Nube)</span>
-                        </span>
-                        <i class="fa-solid fa-right-to-bracket text-[11px] text-emerald-400"></i>
-                    </button>
-
-                    <div class="hw-card p-3 rounded-xl bg-slate-900/80 border border-white/10 text-[11px] space-y-1">
-                        <div class="font-bold text-emerald-400 uppercase tracking-wider flex items-center justify-between">
-                            <span>Tu Dispositivo</span>
-                            <i id="hw-icon" class="fa-solid fa-desktop"></i>
-                        </div>
-                        <div id="hw-details" class="text-slate-400 leading-snug">Analizando...</div>
-                    </div>
-                </div>
-
-                <div class="px-3 py-1 flex-1 overflow-hidden flex flex-col">
-                    <div class="text-[11px] font-semibold text-slate-400 px-3 mb-2 uppercase tracking-wider">Historial</div>
-                    <div id="chat-history" class="space-y-1 flex-1 overflow-y-auto custom-scrollbar"></div>
-                </div>
-            </div>
-
-            <div class="p-4 border-t border-white/5">
-                <button onclick="toggleTheme()" class="w-full py-2.5 px-3 rounded-xl bg-white/5 text-slate-300 text-xs font-semibold flex items-center justify-between hover:bg-white/10 transition-colors">
-                    <span class="flex items-center space-x-2">
-                        <i id="theme-icon" class="fa-solid fa-moon text-emerald-400"></i>
-                        <span id="theme-text">Modo Oscuro</span>
-                    </span>
-                    <i class="fa-solid fa-circle-half-stroke text-[10px] text-slate-400"></i>
-                </button>
-            </div>
-        </aside>
-
-        <!-- Main Content -->
-        <main class="flex-1 flex flex-col h-full relative overflow-hidden bg-slate-950/50">
-            <!-- Header -->
-            <header class="h-16 border-b border-white/5 glass-panel flex items-center justify-between px-3 sm:px-5 z-20 gap-2">
-                <div class="flex items-center space-x-2 flex-1 min-w-0">
-                    <button onclick="openSidebar()" class="md:hidden text-slate-400 p-2 rounded-xl hover:bg-white/10 flex-shrink-0">
-                        <i class="fa-solid fa-bars text-xl"></i>
-                    </button>
-
-                    <button id="model-picker-btn" onclick="openModelModal()" class="flex items-center space-x-2 bg-slate-900 hover:bg-slate-800 border border-white/10 rounded-xl px-3 py-2 text-xs sm:text-sm font-semibold max-w-full sm:max-w-md truncate transition-colors">
-                        <span id="active-model-icon">✨</span>
-                        <span id="active-model-name" class="truncate">Auto (Gemini 3.0)</span>
-                        <i class="fa-solid fa-chevron-down text-[10px] text-slate-400 flex-shrink-0 ml-1"></i>
-                    </button>
-                </div>
-
-                <div class="flex items-center space-x-2 text-[11px] font-bold text-emerald-400 bg-emerald-500/10 px-2.5 sm:px-3 py-1.5 rounded-full border border-emerald-500/20 flex-shrink-0">
-                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                    <span id="status-text">Detectando...</span>
-                </div>
-            </header>
-
-            <!-- Banner si se abrió desde archivo suelto (content:// o file://) -->
-            <div id="rawfile-banner" class="hidden bg-rose-500/15 border-b border-rose-500/30 px-4 py-3 text-xs text-rose-200 light:text-rose-900">
-                <div class="flex items-start space-x-2.5">
-                    <i class="fa-solid fa-triangle-exclamation text-rose-400 text-base mt-0.5"></i>
+    <!-- Sidebar -->
+    <aside id="sidebar" class="fixed md:relative inset-y-0 left-0 z-40 w-72 bg-slate-900 border-r border-white/10 flex flex-col justify-between -translate-x-full md:translate-x-0 transition-transform duration-200">
+        <div class="p-4 space-y-3 overflow-y-auto flex-1">
+            <div class="flex items-center justify-between pb-3 border-b border-white/10">
+                <div class="flex items-center space-x-2.5">
+                    <div class="w-9 h-9 rounded-xl bg-emerald-400 text-slate-950 flex items-center justify-center"><i class="fa-solid fa-brain"></i></div>
                     <div>
-                        <strong class="text-rose-400">Archivo abierto localmente sin servidor (<span id="raw-proto"></span>):</strong>
-                        Chrome bloquea el inicio de sesión cuando abres un <code>.html</code> desde Descargas/Archivos.
-                        <strong>Súbelo a GitHub Pages (<code>https://...</code>)</strong> para que el login y Gemini funcionen.
+                        <div class="font-bold text-base text-emerald-400 leading-none">NAI</div>
+                        <div id="device-tag" class="text-[10px] text-slate-400 uppercase mt-1">Iniciando...</div>
                     </div>
                 </div>
+                <button onclick="toggleSidebar(false)" class="md:hidden p-2 text-slate-400"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
 
-            <!-- Banner normal de Login cuando ya está en https:// -->
-            <div id="login-banner" class="hidden bg-amber-500/15 border-b border-amber-500/30 px-4 py-3 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5 text-xs">
-                <div class="flex items-start space-x-2.5 text-amber-200 light:text-amber-900">
-                    <i id="banner-icon" class="fa-solid fa-lock text-amber-400 text-base mt-0.5"></i>
-                    <div id="banner-message">Inicia sesión para usar este modelo en la nube.</div>
-                </div>
-                <button onclick="loginDirect()" class="w-full sm:w-auto px-4 py-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold text-xs flex-shrink-0 shadow text-center">
-                    🔑 Iniciar sesión ahora
+            <button onclick="newChat()" class="w-full py-2.5 px-3 rounded-xl bg-emerald-500 text-slate-950 font-bold text-xs flex items-center justify-center space-x-2">
+                <i class="fa-solid fa-plus"></i><span>Nueva conversación</span>
+            </button>
+
+            <button onclick="handleAuthBtn()" class="w-full py-2.5 px-3 rounded-xl bg-white/5 border border-white/10 text-xs font-semibold flex items-center justify-between">
+                <span class="flex items-center space-x-2 truncate">
+                    <i id="auth-dot" class="fa-solid fa-circle text-[8px] text-amber-400"></i>
+                    <span id="auth-label" class="truncate">Iniciar sesión (Nube)</span>
+                </span>
+                <i class="fa-solid fa-right-to-bracket text-emerald-400"></i>
+            </button>
+
+            <div id="hw-box" class="p-2.5 rounded-xl bg-slate-950/60 border border-white/10 text-[11px] text-slate-400 leading-snug"></div>
+
+            <div class="text-[10px] font-bold uppercase text-slate-500 pt-2">Historial</div>
+            <div id="history-list" class="space-y-1"></div>
+        </div>
+
+        <div class="p-3 border-t border-white/10">
+            <button onclick="toggleTheme()" class="w-full py-2 px-3 rounded-xl bg-white/5 text-xs font-semibold flex items-center justify-between">
+                <span id="theme-label">Modo Oscuro</span>
+                <i class="fa-solid fa-circle-half-stroke text-emerald-400"></i>
+            </button>
+        </div>
+    </aside>
+
+    <!-- Main -->
+    <main class="flex-1 flex flex-col h-full min-w-0 bg-slate-950">
+        <header class="h-14 border-b border-white/10 bg-slate-900/90 flex items-center justify-between px-3 gap-2 flex-shrink-0">
+            <div class="flex items-center space-x-2 min-w-0 flex-1">
+                <button onclick="toggleSidebar(true)" class="md:hidden p-2 text-slate-300 flex-shrink-0"><i class="fa-solid fa-bars text-lg"></i></button>
+                <button id="model-btn" onclick="openModal()" class="flex items-center space-x-2 bg-slate-800 border border-white/10 rounded-xl px-3 py-1.5 text-xs font-semibold min-w-0 truncate">
+                    <span id="m-icon">✨</span>
+                    <span id="m-name" class="truncate">Auto (Gemini 3.0)</span>
+                    <i class="fa-solid fa-chevron-down text-[10px] text-slate-400 flex-shrink-0"></i>
                 </button>
             </div>
-
-            <div id="chat-container" class="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6 custom-scrollbar"></div>
-
-            <!-- Input -->
-            <div class="input-wrapper p-3 sm:p-6 glass-panel border-t border-white/5 relative z-20">
-                <div class="max-w-4xl mx-auto">
-                    <div class="input-box relative flex items-center bg-slate-900 rounded-2xl border border-white/10 shadow-2xl overflow-hidden">
-                        <textarea 
-                            id="user-input" 
-                            rows="1" 
-                            placeholder="Escribe tu mensaje..." 
-                            onkeydown="handleKeyDown(event)"
-                            oninput="autoResize(this)"
-                            class="w-full bg-transparent text-slate-100 placeholder-slate-500 rounded-2xl pl-4 pr-14 py-4 text-sm focus:outline-none resize-none max-h-40"
-                        ></textarea>
-                        <button 
-                            id="send-btn"
-                            onclick="handleChatSubmit()"
-                            class="absolute right-2.5 bottom-2.5 w-10 h-10 bg-emerald-500 hover:bg-emerald-400 disabled:opacity-50 text-slate-950 font-bold rounded-xl flex items-center justify-center transition-all shadow-md"
-                        >
-                            <i class="fa-solid fa-arrow-up text-sm"></i>
-                        </button>
-                    </div>
-                </div>
+            <div class="text-[11px] font-bold text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/20 flex-shrink-0">
+                <span id="status-text">Iniciando...</span>
             </div>
-        </main>
-    </div>
+        </header>
 
-    <!-- Modal Organizado para Elegir Modelo -->
-    <div id="model-modal" onclick="if(event.target===this) closeModelModal()" class="hidden fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
-        <div class="modal-surface w-full sm:max-w-lg bg-slate-900 border border-white/10 rounded-t-3xl sm:rounded-2xl shadow-2xl max-h-[85vh] flex flex-col overflow-hidden">
-            <div class="p-4 sm:p-5 border-b border-white/10 flex items-center justify-between">
+        <!-- Banner de Login -->
+        <div id="login-banner" class="hidden bg-amber-500/15 border-b border-amber-500/30 px-3 py-2.5 flex items-center justify-between gap-2 text-xs flex-shrink-0">
+            <span id="banner-msg" class="text-amber-200 light:text-amber-900 leading-tight">Inicia sesión gratis para usar Gemini en la nube.</span>
+            <button onclick="loginDirect()" class="px-3 py-1.5 rounded-lg bg-amber-400 text-slate-950 font-bold text-xs flex-shrink-0">🔑 Iniciar sesión</button>
+        </div>
+
+        <!-- Chat -->
+        <div id="chat-box" class="flex-1 overflow-y-auto p-3 sm:p-5 space-y-4"></div>
+
+        <!-- Input -->
+        <div class="input-wrap p-3 bg-slate-900/90 border-t border-white/10 flex-shrink-0">
+            <div class="input-box max-w-3xl mx-auto flex items-end bg-slate-800 rounded-2xl border border-white/10 p-1.5">
+                <textarea id="user-input" rows="1" placeholder="Escribe tu mensaje..." onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMsg();}" oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,120)+'px';" class="w-full bg-transparent text-slate-100 placeholder-slate-400 px-3 py-2 text-sm focus:outline-none resize-none max-h-32"></textarea>
+                <button id="send-btn" onclick="sendMsg()" class="w-10 h-10 bg-emerald-500 hover:bg-emerald-400 text-slate-950 rounded-xl flex items-center justify-center flex-shrink-0 font-bold">
+                    <i class="fa-solid fa-arrow-up"></i>
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal Modelos -->
+    <div id="model-modal" onclick="if(event.target===this) closeModal()" class="hidden fixed inset-0 z-50 bg-black/75 flex items-end sm:items-center justify-center p-0 sm:p-4">
+        <div class="modal-box w-full sm:max-w-md bg-slate-900 border border-white/10 rounded-t-3xl sm:rounded-2xl max-h-[80dvh] flex flex-col overflow-hidden">
+            <div class="p-4 border-b border-white/10 flex items-center justify-between">
                 <div>
-                    <h2 class="text-base font-bold">Elegir Modelo de IA</h2>
-                    <p id="modal-device-subtitle" class="text-xs text-slate-400 mt-0.5"></p>
+                    <div class="font-bold text-sm">Elegir Modelo de IA</div>
+                    <div id="modal-sub" class="text-[11px] text-slate-400"></div>
                 </div>
-                <button onclick="closeModelModal()" class="text-slate-400 hover:text-white p-2 rounded-xl hover:bg-white/10">
-                    <i class="fa-solid fa-xmark text-lg"></i>
-                </button>
+                <button onclick="closeModal()" class="p-2 text-slate-400"><i class="fa-solid fa-xmark"></i></button>
             </div>
-            <div id="model-modal-list" class="p-4 space-y-5 overflow-y-auto custom-scrollbar"></div>
+            <div id="modal-list" class="p-4 space-y-4 overflow-y-auto"></div>
         </div>
     </div>
 
     <script>
+        window.onerror = function(msg, url, line) {
+            const box = document.getElementById('chat-box');
+            const st = document.getElementById('status-text');
+            if (st) st.innerText = 'Error JS';
+            if (box) box.innerHTML += `<div class="p-3 rounded-xl bg-rose-500/20 border border-rose-500 text-xs text-rose-200">Error línea ${line}: ${msg}</div>`;
+        };
+    </script>
+
+    <script>
         const LOCAL_MODELS = [
-            { id: 'local-auto', icon: '⚡', name: 'Auto PC (En tu procesador)', desc: 'Elige según la potencia de tu PC. Sin login.', badge: 'Sin Login', badgeColor: 'bg-emerald-500/20 text-emerald-400' },
-            { id: 'local-high', icon: '🧠', name: 'Qwen 2.5 0.5B (PC Potente)', desc: 'Buena comprensión en español dentro de tu computadora.', badge: 'Sin Login', badgeColor: 'bg-emerald-500/20 text-emerald-400' },
-            { id: 'local-medium', icon: '⚙️', name: 'SmolLM2 360M (PC Media)', desc: 'Ligero y rápido para no exigir demasiado CPU.', badge: 'Sin Login', badgeColor: 'bg-emerald-500/20 text-emerald-400' }
+            { id: 'local-auto', icon: '⚡', name: 'Auto PC (En tu procesador)', desc: 'Ajustado a tu PC. Sin login.', tag: 'Sin Login' },
+            { id: 'local-high', icon: '🧠', name: 'Qwen 2.5 0.5B (PC Potente)', desc: 'Mejor español local.', tag: 'Sin Login' },
+            { id: 'local-medium', icon: '⚙️', name: 'SmolLM2 360M (PC Media)', desc: 'Más ligero.', tag: 'Sin Login' }
+        ];
+        const CLOUD_MODELS = [
+            { id: 'cloud-auto', icon: '✨', name: 'Auto (Gemini 3.0)', desc: 'Elige 3.5 para común y 3.6 para código.', tag: 'Recomendado' },
+            { id: 'google/gemini-3.5-flash', icon: '💬', name: 'Gemini 3.5 Flash', desc: 'Respuestas comunes y rápidas.', tag: 'Común' },
+            { id: 'google/gemini-3.6-flash', icon: '💻', name: 'Gemini 3.6 Flash', desc: 'Especialista en código.', tag: 'Código' },
+            { id: 'google/gemini-3-flash-preview', icon: '🧭', name: 'Gemini 3.0 Flash', desc: 'Directo.', tag: 'Nube' },
+            { id: 'google/gemini-3.8-flash', icon: '⚡', name: 'Gemini 3.8 Flash', desc: 'Avanzado rápido.', tag: 'Nube' },
+            { id: 'google/gemini-4-hydrogen', icon: '🌟', name: 'Gemini 4 Hydrogen', desc: 'Uso diario avanzado.', tag: 'Avanzado' },
+            { id: 'google/gemini-4-argon', icon: '🧬', name: 'Gemini 4 Argon', desc: 'Ingeniería y razonamiento.', tag: 'Avanzado' },
+            { id: 'google/gemini-4-carbon', icon: '💎', name: 'Gemini 4 Carbon', desc: 'Máxima potencia Google.', tag: 'Top' },
+            { id: 'gpt-6-luna', icon: '🤖', name: 'GPT-6 Luna', desc: 'Modelo de OpenAI.', tag: 'Avanzado' },
+            { id: 'claude-opus-4-8', icon: '🟣', name: 'Claude Opus 4.8', desc: 'Modelo de Anthropic.', tag: 'Avanzado' }
         ];
 
-        const CLOUD_MODELS_GEMINI = [
-            { id: 'cloud-auto', icon: '✨', name: 'Automático (Gemini 3.0 elige)', desc: 'Usa Gemini 3.5 para chat normal y Gemini 3.6 para código.', badge: 'Recomendado', badgeColor: 'bg-indigo-500/20 text-indigo-300' },
-            { id: 'google/gemini-3.5-flash', icon: '💬', name: 'Gemini 3.5 Flash', desc: 'Para preguntas comunes, resúmenes y chat diario.', badge: 'Nube', badgeColor: 'bg-sky-500/20 text-sky-300' },
-            { id: 'google/gemini-3.6-flash', icon: '💻', name: 'Gemini 3.6 Flash', desc: 'Especialista en código, programación y errores.', badge: 'Código', badgeColor: 'bg-emerald-500/20 text-emerald-300' },
-            { id: 'google/gemini-3-flash-preview', icon: '🧭', name: 'Gemini 3.0 Flash', desc: 'Modelo Gemini 3.0 directo.', badge: 'Nube', badgeColor: 'bg-sky-500/20 text-sky-300' },
-            { id: 'google/gemini-3.8-flash', icon: '⚡', name: 'Gemini 3.8 Flash', desc: 'Rápido y actualizado.', badge: 'Nube', badgeColor: 'bg-sky-500/20 text-sky-300' }
-        ];
+        let chats = [], activeId = null, busy = false, mode = 'cloud-auto', worker = null;
+        let hw = { isMobile: true, localBlocked: true, cores: 2, ram: null, gpu: false, tier: 'cloud' };
 
-        const CLOUD_MODELS_PRO = [
-            { id: 'google/gemini-4-hydrogen', icon: '🌟', name: 'Gemini 4 Hydrogen', desc: 'Nueva generación uso diario avanzado.', badge: 'Avanzado', badgeColor: 'bg-amber-500/20 text-amber-300' },
-            { id: 'google/gemini-4-argon', icon: '🧬', name: 'Gemini 4 Argon', desc: 'Razonamiento complejo e ingeniería.', badge: 'Avanzado', badgeColor: 'bg-amber-500/20 text-amber-300' },
-            { id: 'google/gemini-4-carbon', icon: '💎', name: 'Gemini 4 Carbon', desc: 'Máxima potencia de Google.', badge: 'Top', badgeColor: 'bg-amber-500/20 text-amber-300' },
-            { id: 'gpt-6-luna', icon: '🤖', name: 'GPT-6 Luna', desc: 'Modelo avanzado de OpenAI.', badge: 'Avanzado', badgeColor: 'bg-amber-500/20 text-amber-300' },
-            { id: 'claude-opus-4-8', icon: '🟣', name: 'Claude Opus 4.8', desc: 'Modelo avanzado de Anthropic.', badge: 'Avanzado', badgeColor: 'bg-amber-500/20 text-amber-300' }
-        ];
-
-        const LOCAL_TIERS = {
-            high: { id: 'onnx-community/Qwen2.5-0.5B-Instruct', label: 'PC Local (Qwen 2.5 0.5B)', maxTokens: 320, sizeHint: '~380 MB' },
-            medium: { id: 'onnx-community/SmolLM2-360M-Instruct-ONNX', label: 'PC Local (SmolLM2 360M)', maxTokens: 200, sizeHint: '~200 MB' }
-        };
-
-        let conversations = [];
-        let activeChatId = null;
-        let isProcessing = false;
-        let selectedMode = 'cloud-auto';
-        let aiWorker = null;
-
-        let deviceProfile = {
-            isMobile: false,
-            isRawFile: false,
-            localBlocked: true,
-            cores: 2,
-            ramGB: null,
-            hasWebGPU: false,
-            benchMs: 50,
-            tier: 'cloud'
-        };
-
-        // ============================================================
-        // 1. UTILIDADES SEGURAS DE ALMACENAMIENTO Y DETECCIÓN
-        // ============================================================
-        function safeGetStorage(key) {
-            try { return localStorage.getItem(key); } catch (_) { return null; }
+        const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+        function fmt(text) {
+            const blocks = [];
+            let t = String(text).replace(/```[\w-]*\n?([\s\S]*?)```/g, (_, c) => {
+                blocks.push(`<pre><code>${esc(c.trimEnd())}</code></pre>`);
+                return `@@B${blocks.length-1}@@`;
+            });
+            t = esc(t).replace(/`([^`\n]+)`/g,'<code>$1</code>').replace(/\*\*([^*\n]+)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>');
+            blocks.forEach((b, i) => t = t.replace(`@@B${i}@@`, b));
+            return t;
         }
-        function safeSetStorage(key, val) {
-            try { localStorage.setItem(key, val); } catch (_) {}
-        }
+        const getLS = k => { try { return localStorage.getItem(k); } catch { return null; } };
+        const setLS = (k, v) => { try { localStorage.setItem(k, v); } catch {} };
+        const isSignedIn = () => { try { return typeof puter !== 'undefined' && puter.auth && puter.auth.isSignedIn(); } catch { return false; } };
 
-        function detectIsRawFile() {
-            const p = window.location.protocol;
-            return p === 'file:' || p === 'content:' || window.location.origin === 'null' || !window.location.origin;
-        }
-
-        function detectIsMobile() {
+        function detectHardwareSync() {
             const ua = navigator.userAgent || '';
-            const mobileUA = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile|Tablet/i.test(ua);
-            const iPadOS = /Macintosh/i.test(ua) && navigator.maxTouchPoints > 1;
-            const uaDataMobile = navigator.userAgentData && navigator.userAgentData.mobile === true;
-            const touchMobile = navigator.maxTouchPoints > 0 && window.innerWidth <= 1024;
-            return Boolean(uaDataMobile || mobileUA || iPadOS || touchMobile);
-        }
-
-        function runQuickCpuBenchmark() {
-            const t0 = performance.now();
-            let acc = 0;
-            for (let i = 1; i <= 1500000; i++) acc += Math.sqrt(i) * 0.0001;
-            if (acc < 0) console.log(acc);
-            return Math.round(performance.now() - t0);
-        }
-
-        async function inspectDeviceAndHardware() {
-            const isMobile = detectIsMobile();
-            const isRawFile = detectIsRawFile();
+            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile|Tablet/i.test(ua) || (navigator.maxTouchPoints > 0 && window.innerWidth <= 1024);
             const cores = navigator.hardwareConcurrency || 2;
-            const ramGB = typeof navigator.deviceMemory === 'number' ? navigator.deviceMemory : null;
+            const ram = typeof navigator.deviceMemory === 'number' ? navigator.deviceMemory : null;
 
-            let hasWebGPU = false;
-            if (!isMobile && 'gpu' in navigator) {
-                try { hasWebGPU = Boolean(await navigator.gpu.requestAdapter()); } catch (_) {}
+            let benchMs = 999;
+            if (!isMobile) {
+                const t0 = performance.now();
+                let x = 0; for (let i = 1; i <= 1200000; i++) x += Math.sqrt(i);
+                if (x < 0) console.log(x);
+                benchMs = Math.round(performance.now() - t0);
             }
 
-            const benchMs = isMobile ? 999 : runQuickCpuBenchmark();
-            let localBlocked = false;
-            let tier = 'cloud';
+            const weakPC = (ram !== null && ram < 4) || cores <= 2 || benchMs >= 75;
+            const localBlocked = isMobile || weakPC;
+            const tier = localBlocked ? 'cloud' : (cores >= 8 && (ram === null || ram >= 8) && benchMs < 40 ? 'high' : 'medium');
+            hw = { isMobile, localBlocked, cores, ram, gpu: false, benchMs, tier };
+        }
 
-            if (isMobile) {
-                localBlocked = true;
-            } else {
-                const lowRam = ramGB !== null && ramGB < 4;
-                const weakCpu = cores <= 2 || benchMs >= 75;
-                const borderlineNoGpu = !hasWebGPU && (cores < 4 || (ramGB !== null && ramGB <= 4 && benchMs >= 50));
+        function updateUI() {
+            if (hw.localBlocked && mode.startsWith('local-')) mode = 'cloud-auto';
+            const all = hw.localBlocked ? CLOUD_MODELS : [...LOCAL_MODELS, ...CLOUD_MODELS];
+            const info = all.find(m => m.id === mode) || CLOUD_MODELS[0];
+            mode = info.id;
 
-                if (lowRam || weakCpu || borderlineNoGpu) {
-                    localBlocked = true;
-                } else if (
-                    (hasWebGPU && (ramGB === null || ramGB >= 4) && cores >= 4) ||
-                    (cores >= 8 && (ramGB === null || ramGB >= 8) && benchMs < 40)
-                ) {
-                    tier = 'high';
-                } else {
-                    tier = 'medium';
-                }
+            document.getElementById('m-icon').innerText = info.icon;
+            document.getElementById('m-name').innerText = info.name;
+            document.getElementById('device-tag').innerText = hw.isMobile ? 'Celular · Nube' : (hw.localBlocked ? 'PC Justa · Nube' : 'PC · Local/Nube');
+            document.getElementById('hw-box').innerHTML = hw.isMobile
+                ? '📱 <strong>Celular:</strong> IA local bloqueada. Usa la nube con sesión.'
+                : (hw.localBlocked
+                    ? `💻 <strong>PC Justa (${hw.cores} hilos):</strong> Se usa la nube para no trabarse.`
+                    : `🖥️ <strong>PC Lista (${hw.cores} hilos):</strong> Local o Nube disponibles.`);
+
+            const signed = isSignedIn();
+            document.getElementById('auth-dot').className = `fa-solid fa-circle text-[8px] ${signed ? 'text-emerald-400' : 'text-amber-400'}`;
+            document.getElementById('auth-label').innerText = signed ? 'Sesión activa' : 'Iniciar sesión (Nube)';
+            document.getElementById('login-banner').classList.toggle('hidden', signed || mode.startsWith('local-'));
+            document.getElementById('status-text').innerText = mode.startsWith('local-') ? 'Listo (Local)' : (signed ? 'Nube Activa' : 'Requiere Login');
+        }
+
+        function toggleSidebar(open) { document.getElementById('sidebar').classList.toggle('-translate-x-full', !open); }
+        function toggleTheme() {
+            const dark = !document.documentElement.classList.contains('dark');
+            document.documentElement.classList.toggle('dark', dark);
+            document.documentElement.classList.toggle('light', !dark);
+            document.getElementById('theme-label').innerText = dark ? 'Modo Oscuro' : 'Modo Claro';
+            setLS('nai_v5_theme', dark ? 'dark' : 'light');
+        }
+
+        function openModal() {
+            document.getElementById('modal-sub').innerText = hw.localBlocked ? 'Solo modelos en la nube disponibles para este equipo.' : 'Elige Local (sin login) o Nube (con login).';
+            const card = m => `<button onclick="pickModel('${m.id}')" class="model-card w-full text-left p-3 rounded-xl border flex justify-between items-start gap-2 ${m.id===mode?'bg-emerald-500/15 border-emerald-500':'bg-slate-800 border-white/10'}">
+                <div class="flex space-x-2.5 min-w-0"><span class="text-lg">${m.icon}</span><div class="min-w-0"><div class="text-xs font-bold truncate">${esc(m.name)}</div><div class="text-[11px] text-slate-400">${esc(m.desc)}</div></div></div>
+                <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-white/10 flex-shrink-0">${m.tag}</span></button>`;
+            let html = '';
+            if (!hw.localBlocked) html += `<div><div class="text-[10px] font-bold uppercase text-slate-400 mb-2">🖥️ En tu PC (Sin Login)</div><div class="space-y-2">${LOCAL_MODELS.map(card).join('')}</div></div>`;
+            html += `<div><div class="text-[10px] font-bold uppercase text-slate-400 mb-2">☁️ En la Nube (Requiere Sesión)</div><div class="space-y-2">${CLOUD_MODELS.map(card).join('')}</div></div>`;
+            document.getElementById('modal-list').innerHTML = html;
+            document.getElementById('model-modal').classList.remove('hidden');
+        }
+        function closeModal() { document.getElementById('model-modal').classList.add('hidden'); }
+        function pickModel(id) { mode = id; setLS('nai_v5_mode', mode); updateUI(); closeModal(); }
+
+        function loginDirect(cb) {
+            if (typeof puter === 'undefined' || !puter.auth) {
+                addMsg('assistant', '⚠️ **Puter.js aún está cargando o fue bloqueado.** Espera 2 segundos o desactiva bloqueadores de anuncios.', 'Aviso');
+                return;
             }
-
-            deviceProfile = { isMobile, isRawFile, localBlocked, cores, ramGB, hasWebGPU, benchMs, tier };
+            document.getElementById('status-text').innerText = 'Abriendo login...';
+            puter.auth.signIn().then(() => { updateUI(); if (cb) cb(); }).catch(e => {
+                const msg = e?.message || e?.error || JSON.stringify(e);
+                updateUI();
+                if (!String(msg).includes('auth_window_closed')) addMsg('assistant', `⚠️ **Error de login:** ${msg}`, 'Aviso');
+            });
+        }
+        function handleAuthBtn() {
+            if (isSignedIn()) { if (confirm('¿Cerrar sesión?')) { puter.auth.signOut(); updateUI(); } }
+            else loginDirect();
         }
 
-        function getAllAllowedModels() {
-            const cloud = [...CLOUD_MODELS_GEMINI, ...CLOUD_MODELS_PRO];
-            return deviceProfile.localBlocked ? cloud : [...LOCAL_MODELS, ...cloud];
+        function newChat() {
+            if (busy) return;
+            const id = 'c_' + Date.now();
+            const txt = hw.localBlocked ? '👋 ¡Hola! Toca **🔑 Iniciar sesión** arriba para activar Gemini 3.0 / 3.5 / 3.6 y modelos avanzados.' : '🖥️ ¡Hola! Tu PC soporta ejecución local sin login o modelos avanzados en la nube.';
+            chats.unshift({ id, title: 'Nueva conversación', msgs: [{ role: 'assistant', sys: true, label: 'NAI', text: txt }] });
+            activeId = id; saveChats(); renderHistory(); renderMsgs(); toggleSidebar(false);
+        }
+        const getChat = () => chats.find(c => c.id === activeId) || chats[0];
+        const saveChats = () => setLS('nai_v5_chats', JSON.stringify(chats));
+        function addMsg(role, text, label) { getChat().msgs.push({ role, text, label, sys: role==='assistant'&&label==='Aviso' }); saveChats(); renderMsgs(); }
+
+        function renderHistory() {
+            document.getElementById('history-list').innerHTML = chats.map(c => `<div onclick="activeId='${c.id}';renderHistory();renderMsgs();toggleSidebar(false)" class="p-2 rounded-lg text-xs truncate cursor-pointer ${c.id===activeId?'bg-emerald-500/20 text-emerald-400':'text-slate-400'}">${esc(c.title)}</div>`).join('');
+        }
+        function renderMsgs() {
+            const box = document.getElementById('chat-box');
+            box.innerHTML = getChat().msgs.map(m => m.role === 'user'
+                ? `<div class="flex justify-end"><div class="max-w-[85%] bg-emerald-500 text-slate-950 font-medium px-4 py-2.5 rounded-2xl rounded-tr-none text-sm">${fmt(m.text)}</div></div>`
+                : `<div class="flex justify-start"><div class="bubble-ai prose-chat max-w-[90%] bg-slate-900 border border-white/10 px-4 py-3 rounded-2xl rounded-tl-none text-sm">${m.label?`<div class="text-[10px] font-bold text-emerald-400 uppercase mb-1">${esc(m.label)}</div>`:''}<div ${m.stream?'id="stream-body"':''}>${m.text?fmt(m.text):'<i class="fa-solid fa-circle-notch fa-spin text-emerald-400 mr-2"></i>Pensando...'}</div></div></div>`
+            ).join('');
+            box.scrollTop = box.scrollHeight;
         }
 
-        function findModelInfo(i
+        function runLocal(hist, msgObj) {
+            return new Promise((resolve, reject) => {
+                if (!worker) {
+                    const code = `import { pipeline, TextStreamer, env } from 'https://cdn.jsdelivr.net/npm/@huggingface/transformers'; const cache=new Map(); self.onmessage=async e=>{ const {id,model,dev,msgs,max}=e.data; try{ if(env?.backends?.onnx?.wasm) env.backends.onnx.wasm.numThreads=1; let g=cache.get(model); if(!g){ g=await pipeline('text-generation',model,{device:dev,dtype:'q4',progress_callback:p=>{if(p.status==='progress')self.postMessage({id,ev:'prog',p:Math.round(p.progress)})}}); cache.set(model,g); } let out=''; const st=new TextStreamer(g.tokenizer,{skip_prompt:true,skip_special_tokens:true,callback_function:t=>{out+=t;self.postMessage({id,ev:'tok',t:out})}}); await g(msgs,{max_new_tokens:max,do_sample:true,temperature:0.65,streamer:st}); self.postMe
