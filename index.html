@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NAI - IA Adaptativa (Nube y PC)</title>
+    <title>NAI - Asistente IA</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://js.puter.com/v2/"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -17,12 +17,12 @@
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; }
         .glass-panel {
-            background: rgba(15, 23, 42, 0.8);
+            background: rgba(15, 23, 42, 0.85);
             backdrop-filter: blur(16px);
             border: 1px solid rgba(255, 255, 255, 0.08);
         }
         .light .glass-panel {
-            background: rgba(255, 255, 255, 0.95);
+            background: rgba(255, 255, 255, 0.96);
             border: 1px solid rgba(0, 0, 0, 0.12);
         }
         .custom-scrollbar::-webkit-scrollbar { width: 5px; }
@@ -30,11 +30,12 @@
         .light body { background-color: #f8fafc !important; color: #0f172a !important; }
         .light main { background-color: #f1f5f9 !important; }
         .light aside { background-color: #ffffff !important; color: #0f172a !important; }
-        .light header, .light .input-wrapper { background-color: rgba(255, 255, 255, 0.94) !important; border-color: #e2e8f0 !important; }
+        .light header, .light .input-wrapper { background-color: rgba(255, 255, 255, 0.96) !important; border-color: #e2e8f0 !important; }
         .light .input-box { background-color: #e2e8f0 !important; border-color: #cbd5e1 !important; }
-        .light #user-input, .light #model-selector { color: #0f172a !important; }
-        .light #model-selector { background-color: #e2e8f0 !important; border-color: #cbd5e1 !important; }
-        .light .hw-card { background-color: #f1f5f9 !important; border-color: #cbd5e1 !important; color: #0f172a !important; }
+        .light #user-input { color: #0f172a !important; }
+        .light #model-picker-btn { background-color: #e2e8f0 !important; color: #0f172a !important; border-color: #cbd5e1 !important; }
+        .light .hw-card, .light .modal-surface { background-color: #ffffff !important; border-color: #cbd5e1 !important; color: #0f172a !important; }
+        .light .model-item { background-color: #f8fafc !important; border-color: #cbd5e1 !important; color: #0f172a !important; }
         .light .chat-assistant-bubble { background-color: #ffffff !important; color: #0f172a !important; border: 1px solid #cbd5e1 !important; }
         .light .chat-user-bubble { background: linear-gradient(135deg, #059669 0%, #10b981 100%) !important; color: #ffffff !important; }
         .prose-chat pre {
@@ -62,7 +63,7 @@
                         </div>
                         <div>
                             <h1 class="font-bold text-lg tracking-tight bg-gradient-to-r from-emerald-400 to-indigo-500 bg-clip-text text-transparent">NAI</h1>
-                            <span id="device-tag" class="text-[10px] font-semibold text-emerald-400 uppercase tracking-wider">Analizando equipo...</span>
+                            <span id="device-tag" class="text-[10px] font-semibold text-emerald-400 uppercase tracking-wider">Detectando...</span>
                         </div>
                     </div>
                     <button onclick="closeSidebar()" class="md:hidden text-slate-400 p-2 rounded-xl hover:bg-white/10">
@@ -71,29 +72,25 @@
                 </div>
 
                 <div class="p-4 space-y-2.5">
-                    <button onclick="createNewChat()" class="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 text-slate-950 font-bold text-sm shadow-lg flex items-center justify-center space-x-2 transition-transform hover:scale-[1.02]">
+                    <button onclick="createNewChat()" class="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 text-slate-950 font-bold text-sm shadow-lg flex items-center justify-center space-x-2">
                         <i class="fa-solid fa-plus text-xs"></i>
                         <span>Nueva conversación</span>
                     </button>
 
-                    <!-- Login disponible siempre (tanto en PC como en celular) -->
-                    <button id="puter-auth-btn" onclick="handlePuterAuth()" class="w-full py-2.5 px-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-semibold flex items-center justify-between transition-colors">
+                    <button id="puter-auth-btn" onclick="handleAuthButtonClick()" class="w-full py-2.5 px-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-semibold flex items-center justify-between transition-colors">
                         <span class="flex items-center space-x-2 truncate">
                             <i id="puter-auth-dot" class="fa-solid fa-circle text-[8px] text-amber-400"></i>
-                            <span id="puter-auth-text" class="truncate">Iniciar sesión (Modelos avanzados)</span>
+                            <span id="puter-auth-text" class="truncate">Iniciar sesión (Nube)</span>
                         </span>
                         <i class="fa-solid fa-right-to-bracket text-[11px] text-emerald-400"></i>
                     </button>
 
-                    <!-- Diagnóstico de Equipo -->
                     <div class="hw-card p-3 rounded-xl bg-slate-900/80 border border-white/10 text-[11px] space-y-1">
                         <div class="font-bold text-emerald-400 uppercase tracking-wider flex items-center justify-between">
-                            <span>Diagnóstico de Equipo</span>
+                            <span>Tu Dispositivo</span>
                             <i id="hw-icon" class="fa-solid fa-desktop"></i>
                         </div>
-                        <div id="hw-details" class="text-slate-400 leading-snug">
-                            Evaluando potencia...
-                        </div>
+                        <div id="hw-details" class="text-slate-400 leading-snug">Analizando...</div>
                     </div>
                 </div>
 
@@ -116,61 +113,53 @@
 
         <!-- Main Content -->
         <main class="flex-1 flex flex-col h-full relative overflow-hidden bg-slate-950/50">
-            <header class="h-16 border-b border-white/5 glass-panel flex items-center justify-between px-4 sm:px-5 z-20 gap-3">
-                <div class="flex items-center space-x-2 sm:space-x-3 flex-1 min-w-0">
+            <!-- Header -->
+            <header class="h-16 border-b border-white/5 glass-panel flex items-center justify-between px-3 sm:px-5 z-20 gap-2">
+                <div class="flex items-center space-x-2 flex-1 min-w-0">
                     <button onclick="openSidebar()" class="md:hidden text-slate-400 p-2 rounded-xl hover:bg-white/10 flex-shrink-0">
                         <i class="fa-solid fa-bars text-xl"></i>
                     </button>
 
-                    <!-- Selector de Modelo -->
-                    <div class="flex items-center space-x-2 min-w-0 flex-1 max-w-lg">
-                        <i class="fa-solid fa-microchip text-emerald-400 text-sm hidden sm:inline"></i>
-                        <select id="model-selector" onchange="onModelChange()" class="w-full bg-slate-900 border border-white/10 text-slate-100 text-xs sm:text-sm font-semibold rounded-xl px-3 py-2 focus:outline-none focus:border-emerald-500 cursor-pointer truncate">
-                            <optgroup id="opt-group-local" label="🖥️ En tu Computadora (Sin Login - Solo PC potente)">
-                                <option value="local-auto">⚡ Auto PC — Ejecutar en tu procesador</option>
-                                <option value="local-high">🧠 Local Alto — Qwen 2.5 0.5B</option>
-                                <option value="local-medium">⚙️ Local Medio — SmolLM2 360M</option>
-                            </optgroup>
-                            <optgroup label="☁️ Nube Gemini (Requiere Iniciar Sesión)">
-                                <option value="cloud-auto">✨ Auto Nube — Gemini 3.0 (3.5 común / 3.6 código)</option>
-                                <option value="google/gemini-3.5-flash">💬 Gemini 3.5 Flash (Respuestas comunes)</option>
-                                <option value="google/gemini-3.6-flash">💻 Gemini 3.6 Flash (Código y programación)</option>
-                                <option value="google/gemini-3-flash-preview">🧭 Gemini 3.0 Flash (Directo)</option>
-                                <option value="google/gemini-3.8-flash">⚡ Gemini 3.8 Flash (Avanzado rápido)</option>
-                            </optgroup>
-                            <optgroup label="🚀 Modelos Avanzados en la Nube (Requiere Iniciar Sesión)">
-                                <option value="google/gemini-4-hydrogen">🌟 Gemini 4 Hydrogen (Uso diario avanzado)</option>
-                                <option value="google/gemini-4-argon">🧬 Gemini 4 Argon (Ingeniería y razonamiento)</option>
-                                <option value="google/gemini-4-carbon">💎 Gemini 4 Carbon (Máxima potencia Google)</option>
-                                <option value="gpt-6-luna">🤖 GPT-6 Luna (OpenAI)</option>
-                                <option value="claude-opus-4-8">🟣 Claude Opus 4.8 (Anthropic)</option>
-                            </optgroup>
-                        </select>
-                    </div>
+                    <button id="model-picker-btn" onclick="openModelModal()" class="flex items-center space-x-2 bg-slate-900 hover:bg-slate-800 border border-white/10 rounded-xl px-3 py-2 text-xs sm:text-sm font-semibold max-w-full sm:max-w-md truncate transition-colors">
+                        <span id="active-model-icon">✨</span>
+                        <span id="active-model-name" class="truncate">Auto (Gemini 3.0)</span>
+                        <i class="fa-solid fa-chevron-down text-[10px] text-slate-400 flex-shrink-0 ml-1"></i>
+                    </button>
                 </div>
 
-                <div class="hidden sm:flex items-center space-x-2 text-[11px] font-bold text-emerald-400 bg-emerald-500/10 px-3 py-1.5 rounded-full border border-emerald-500/20 flex-shrink-0">
+                <div class="flex items-center space-x-2 text-[11px] font-bold text-emerald-400 bg-emerald-500/10 px-2.5 sm:px-3 py-1.5 rounded-full border border-emerald-500/20 flex-shrink-0">
                     <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                    <span id="status-text">Analizando...</span>
+                    <span id="status-text">Detectando...</span>
                 </div>
             </header>
 
-            <!-- Banner dinámico cuando se requiere iniciar sesión (Celular, PC justa, o PC usando modelo nube) -->
-            <div id="login-banner" class="hidden bg-amber-500/15 border-b border-amber-500/30 px-4 py-3 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-xs">
-                <div class="flex items-start space-x-2.5 text-amber-200 light:text-amber-900">
-                    <i id="banner-icon" class="fa-solid fa-cloud text-amber-400 text-base mt-0.5"></i>
-                    <div id="banner-message">
-                        Inicia sesión para ejecutar este modelo en la nube.
+            <!-- Banner si se abrió desde archivo suelto (content:// o file://) -->
+            <div id="rawfile-banner" class="hidden bg-rose-500/15 border-b border-rose-500/30 px-4 py-3 text-xs text-rose-200 light:text-rose-900">
+                <div class="flex items-start space-x-2.5">
+                    <i class="fa-solid fa-triangle-exclamation text-rose-400 text-base mt-0.5"></i>
+                    <div>
+                        <strong class="text-rose-400">Archivo abierto localmente sin servidor (<span id="raw-proto"></span>):</strong>
+                        Chrome bloquea el inicio de sesión cuando abres un <code>.html</code> desde Descargas/Archivos.
+                        <strong>Súbelo a GitHub Pages (<code>https://...</code>)</strong> para que el login y Gemini funcionen.
                     </div>
                 </div>
-                <button onclick="handlePuterAuth()" class="px-4 py-1.5 rounded-lg bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold text-xs flex-shrink-0 shadow">
-                    Iniciar sesión
+            </div>
+
+            <!-- Banner normal de Login cuando ya está en https:// -->
+            <div id="login-banner" class="hidden bg-amber-500/15 border-b border-amber-500/30 px-4 py-3 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5 text-xs">
+                <div class="flex items-start space-x-2.5 text-amber-200 light:text-amber-900">
+                    <i id="banner-icon" class="fa-solid fa-lock text-amber-400 text-base mt-0.5"></i>
+                    <div id="banner-message">Inicia sesión para usar este modelo en la nube.</div>
+                </div>
+                <button onclick="loginDirect()" class="w-full sm:w-auto px-4 py-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold text-xs flex-shrink-0 shadow text-center">
+                    🔑 Iniciar sesión ahora
                 </button>
             </div>
 
             <div id="chat-container" class="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6 custom-scrollbar"></div>
 
-            <div class="input-wrapper p-4 sm:p-6 glass-panel border-t border-white/5 relative z-20">
+            <!-- Input -->
+            <div class="input-wrapper p-3 sm:p-6 glass-panel border-t border-white/5 relative z-20">
                 <div class="max-w-4xl mx-auto">
                     <div class="input-box relative flex items-center bg-slate-900 rounded-2xl border border-white/10 shadow-2xl overflow-hidden">
                         <textarea 
@@ -194,21 +183,48 @@
         </main>
     </div>
 
+    <!-- Modal Organizado para Elegir Modelo -->
+    <div id="model-modal" onclick="if(event.target===this) closeModelModal()" class="hidden fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
+        <div class="modal-surface w-full sm:max-w-lg bg-slate-900 border border-white/10 rounded-t-3xl sm:rounded-2xl shadow-2xl max-h-[85vh] flex flex-col overflow-hidden">
+            <div class="p-4 sm:p-5 border-b border-white/10 flex items-center justify-between">
+                <div>
+                    <h2 class="text-base font-bold">Elegir Modelo de IA</h2>
+                    <p id="modal-device-subtitle" class="text-xs text-slate-400 mt-0.5"></p>
+                </div>
+                <button onclick="closeModelModal()" class="text-slate-400 hover:text-white p-2 rounded-xl hover:bg-white/10">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+            <div id="model-modal-list" class="p-4 space-y-5 overflow-y-auto custom-scrollbar"></div>
+        </div>
+    </div>
+
     <script>
-        // Modelos locales SOLO para PC suficientemente potente
+        const LOCAL_MODELS = [
+            { id: 'local-auto', icon: '⚡', name: 'Auto PC (En tu procesador)', desc: 'Elige según la potencia de tu PC. Sin login.', badge: 'Sin Login', badgeColor: 'bg-emerald-500/20 text-emerald-400' },
+            { id: 'local-high', icon: '🧠', name: 'Qwen 2.5 0.5B (PC Potente)', desc: 'Buena comprensión en español dentro de tu computadora.', badge: 'Sin Login', badgeColor: 'bg-emerald-500/20 text-emerald-400' },
+            { id: 'local-medium', icon: '⚙️', name: 'SmolLM2 360M (PC Media)', desc: 'Ligero y rápido para no exigir demasiado CPU.', badge: 'Sin Login', badgeColor: 'bg-emerald-500/20 text-emerald-400' }
+        ];
+
+        const CLOUD_MODELS_GEMINI = [
+            { id: 'cloud-auto', icon: '✨', name: 'Automático (Gemini 3.0 elige)', desc: 'Usa Gemini 3.5 para chat normal y Gemini 3.6 para código.', badge: 'Recomendado', badgeColor: 'bg-indigo-500/20 text-indigo-300' },
+            { id: 'google/gemini-3.5-flash', icon: '💬', name: 'Gemini 3.5 Flash', desc: 'Para preguntas comunes, resúmenes y chat diario.', badge: 'Nube', badgeColor: 'bg-sky-500/20 text-sky-300' },
+            { id: 'google/gemini-3.6-flash', icon: '💻', name: 'Gemini 3.6 Flash', desc: 'Especialista en código, programación y errores.', badge: 'Código', badgeColor: 'bg-emerald-500/20 text-emerald-300' },
+            { id: 'google/gemini-3-flash-preview', icon: '🧭', name: 'Gemini 3.0 Flash', desc: 'Modelo Gemini 3.0 directo.', badge: 'Nube', badgeColor: 'bg-sky-500/20 text-sky-300' },
+            { id: 'google/gemini-3.8-flash', icon: '⚡', name: 'Gemini 3.8 Flash', desc: 'Rápido y actualizado.', badge: 'Nube', badgeColor: 'bg-sky-500/20 text-sky-300' }
+        ];
+
+        const CLOUD_MODELS_PRO = [
+            { id: 'google/gemini-4-hydrogen', icon: '🌟', name: 'Gemini 4 Hydrogen', desc: 'Nueva generación uso diario avanzado.', badge: 'Avanzado', badgeColor: 'bg-amber-500/20 text-amber-300' },
+            { id: 'google/gemini-4-argon', icon: '🧬', name: 'Gemini 4 Argon', desc: 'Razonamiento complejo e ingeniería.', badge: 'Avanzado', badgeColor: 'bg-amber-500/20 text-amber-300' },
+            { id: 'google/gemini-4-carbon', icon: '💎', name: 'Gemini 4 Carbon', desc: 'Máxima potencia de Google.', badge: 'Top', badgeColor: 'bg-amber-500/20 text-amber-300' },
+            { id: 'gpt-6-luna', icon: '🤖', name: 'GPT-6 Luna', desc: 'Modelo avanzado de OpenAI.', badge: 'Avanzado', badgeColor: 'bg-amber-500/20 text-amber-300' },
+            { id: 'claude-opus-4-8', icon: '🟣', name: 'Claude Opus 4.8', desc: 'Modelo avanzado de Anthropic.', badge: 'Avanzado', badgeColor: 'bg-amber-500/20 text-amber-300' }
+        ];
+
         const LOCAL_TIERS = {
-            high: {
-                id: 'onnx-community/Qwen2.5-0.5B-Instruct',
-                label: 'PC Local Potente (Qwen 2.5 0.5B)',
-                maxTokens: 320,
-                sizeHint: '~380 MB'
-            },
-            medium: {
-                id: 'onnx-community/SmolLM2-360M-Instruct-ONNX',
-                label: 'PC Local Media (SmolLM2 360M)',
-                maxTokens: 200,
-                sizeHint: '~200 MB'
-            }
+            high: { id: 'onnx-community/Qwen2.5-0.5B-Instruct', label: 'PC Local (Qwen 2.5 0.5B)', maxTokens: 320, sizeHint: '~380 MB' },
+            medium: { id: 'onnx-community/SmolLM2-360M-Instruct-ONNX', label: 'PC Local (SmolLM2 360M)', maxTokens: 200, sizeHint: '~200 MB' }
         };
 
         let conversations = [];
@@ -219,66 +235,71 @@
 
         let deviceProfile = {
             isMobile: false,
+            isRawFile: false,
             localBlocked: true,
-            blockReason: '',
             cores: 2,
             ramGB: null,
             hasWebGPU: false,
             benchMs: 50,
-            tier: 'cloud' // 'high' | 'medium' | 'cloud'
+            tier: 'cloud'
         };
 
         // ============================================================
-        // 1. DETECCIÓN DE CELULAR VS COMPUTADORA Y SU POTENCIA
+        // 1. UTILIDADES SEGURAS DE ALMACENAMIENTO Y DETECCIÓN
         // ============================================================
+        function safeGetStorage(key) {
+            try { return localStorage.getItem(key); } catch (_) { return null; }
+        }
+        function safeSetStorage(key, val) {
+            try { localStorage.setItem(key, val); } catch (_) {}
+        }
+
+        function detectIsRawFile() {
+            const p = window.location.protocol;
+            return p === 'file:' || p === 'content:' || window.location.origin === 'null' || !window.location.origin;
+        }
+
         function detectIsMobile() {
             const ua = navigator.userAgent || '';
-            const mobileUA = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile/i.test(ua);
+            const mobileUA = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile|Tablet/i.test(ua);
             const iPadOS = /Macintosh/i.test(ua) && navigator.maxTouchPoints > 1;
-            const uaDataMobile = navigator.userAgentData?.mobile === true;
-            const touchSmall = window.matchMedia('(pointer: coarse)').matches && Math.min(window.screen.width, window.screen.height) <= 900;
-            return Boolean(uaDataMobile || mobileUA || iPadOS || touchSmall);
+            const uaDataMobile = navigator.userAgentData && navigator.userAgentData.mobile === true;
+            const touchMobile = navigator.maxTouchPoints > 0 && window.innerWidth <= 1024;
+            return Boolean(uaDataMobile || mobileUA || iPadOS || touchMobile);
         }
 
         function runQuickCpuBenchmark() {
             const t0 = performance.now();
             let acc = 0;
-            for (let i = 1; i <= 1800000; i++) acc += Math.sqrt(i) * 0.0001;
+            for (let i = 1; i <= 1500000; i++) acc += Math.sqrt(i) * 0.0001;
             if (acc < 0) console.log(acc);
             return Math.round(performance.now() - t0);
         }
 
         async function inspectDeviceAndHardware() {
             const isMobile = detectIsMobile();
+            const isRawFile = detectIsRawFile();
             const cores = navigator.hardwareConcurrency || 2;
             const ramGB = typeof navigator.deviceMemory === 'number' ? navigator.deviceMemory : null;
 
             let hasWebGPU = false;
             if (!isMobile && 'gpu' in navigator) {
-                try {
-                    const adapter = await navigator.gpu.requestAdapter();
-                    hasWebGPU = Boolean(adapter);
-                } catch (_) {}
+                try { hasWebGPU = Boolean(await navigator.gpu.requestAdapter()); } catch (_) {}
             }
 
             const benchMs = isMobile ? 999 : runQuickCpuBenchmark();
-
             let localBlocked = false;
-            let blockReason = '';
             let tier = 'cloud';
 
             if (isMobile) {
                 localBlocked = true;
-                blockReason = 'mobile';
             } else {
-                // Criterio estricto: si la PC es demasiado justa, NO ejecutar adentro
                 const lowRam = ramGB !== null && ramGB < 4;
                 const weakCpu = cores <= 2 || benchMs >= 75;
                 const borderlineNoGpu = !hasWebGPU && (cores < 4 || (ramGB !== null && ramGB <= 4 && benchMs >= 50));
 
                 if (lowRam || weakCpu || borderlineNoGpu) {
                     localBlocked = true;
-                    blockReason = 'weak_pc';
                 } else if (
                     (hasWebGPU && (ramGB === null || ramGB >= 4) && cores >= 4) ||
                     (cores >= 8 && (ramGB === null || ramGB >= 8) && benchMs < 40)
@@ -289,53 +310,12 @@
                 }
             }
 
-            deviceProfile = { isMobile, localBlocked, blockReason, cores, ramGB, hasWebGPU, benchMs, tier };
+            deviceProfile = { isMobile, isRawFile, localBlocked, cores, ramGB, hasWebGPU, benchMs, tier };
         }
 
-        function applyDevicePolicyToUI() {
-            const tag = document.getElementById('device-tag');
-            const hwIcon = document.getElementById('hw-icon');
-            const hwDetails = document.getElementById('hw-details');
-            const selector = document.getElementById('model-selector');
+        function getAllAllowedModels() {
+            const cloud = [...CLOUD_MODELS_GEMINI, ...CLOUD_MODELS_PRO];
+            return deviceProfile.localBlocked ? cloud : [...LOCAL_MODELS, ...cloud];
+        }
 
-            const ramText = deviceProfile.ramGB ? `${deviceProfile.ramGB} GB` : 'No expuesta';
-            const gpuText = deviceProfile.hasWebGPU ? 'WebGPU' : 'CPU';
-
-            // Habilitar o bloquear opciones locales según corresponda
-            Array.from(selector.options).forEach(opt => {
-                if (opt.value.startsWith('local-')) {
-                    opt.disabled = deviceProfile.localBlocked;
-                    const cleanText = opt.text.replace(' (Bloqueado en este equipo)', '');
-                    opt.text = deviceProfile.localBlocked ? cleanText + ' (Bloqueado en este equipo)' : cleanText;
-                }
-            });
-
-            if (deviceProfile.isMobile) {
-                tag.innerText = 'Celular · Solo Nube';
-                hwIcon.className = 'fa-solid fa-mobile-screen-button text-amber-400';
-                hwDetails.innerHTML = `
-                    <div><strong>Equipo:</strong> Celular / Móvil</div>
-                    <div><strong>Ejecución local:</strong> Desactivada</div>
-                    <div class="text-amber-400 font-semibold mt-1">Usa la nube con inicio de sesión</div>
-                `;
-                selectedMode = 'cloud-auto';
-                selector.value = 'cloud-auto';
-                setStatus('Celular · Requiere Login');
-            } else if (deviceProfile.localBlocked) {
-                tag.innerText = 'PC Justa · Modo Nube';
-                hwIcon.className = 'fa-solid fa-laptop text-amber-400';
-                hwDetails.innerHTML = `
-                    <div><strong>CPU:</strong> ${deviceProfile.cores} hilos (${deviceProfile.benchMs} ms)</div>
-                    <div><strong>RAM:</strong> ${ramText} · <strong>Motor:</strong> ${gpuText}</div>
-                    <div class="text-amber-400 font-semibold mt-1">Equipo justo: IA local bloqueada para no trabar tu PC. Se usa la nube.</div>
-                `;
-                selectedMode = 'cloud-auto';
-                selector.value = 'cloud-auto';
-                setStatus('PC Justa · Modo Nube');
-            } else {
-                const tierLabel = deviceProfile.tier === 'high' ? 'Alta (Qwen 2.5 0.5B)' : 'Media (SmolLM2 360M)';
-                tag.innerText = 'PC Lista · Local o Nube';
-                hwIcon.className = 'fa-solid fa-desktop text-emerald-400';
-                hwDetails.innerHTML = `
-                    <div><strong>CPU:</strong> ${deviceProfile.cores} hilos (${deviceProfile.benchMs} ms)</div>
-            
+        function findModelInfo(i
