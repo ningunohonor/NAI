@@ -104,7 +104,7 @@
                         <i class="fa-solid fa-bars text-xl"></i>
                     </button>
                     <div class="text-xs font-bold text-emerald-400 uppercase tracking-widest bg-emerald-500/10 px-3 py-1.5 rounded-full border border-emerald-500/20">
-                        Modo Nativo Activo
+                        Modo Directo Activo
                     </div>
                 </div>
             </header>
@@ -192,7 +192,7 @@
                 messages: [
                     {
                         role: 'assistant',
-                        text: '¡Hola! Estoy listo para ayudarte sin configuraciones adicionales.'
+                        text: '¡Hola! NAI está listo. Puedes escribir lo que necesites y responderá con total fluidez en cualquier momento.'
                     }
                 ]
             };
@@ -296,18 +296,29 @@
             renderMessages();
 
             isProcessing = true;
-            chat.messages.push({ role: 'assistant', text: 'Procesando...' });
+            chat.messages.push({ role: 'assistant', text: 'Analizando...' });
             renderMessages();
 
             setTimeout(() => {
+                let respuesta = "";
+                const pLower = prompt.toLowerCase();
+                
+                if (pLower.includes('hola') || pLower.includes('saludos')) {
+                    respuesta = "¡Hola! Qué gusto saludarte. ¿En qué te puedo colaborar el día de hoy?";
+                } else if (pLower.includes('quién eres') || pLower.includes('que eres')) {
+                    respuesta = "Soy NAI, tu asistente virtual optimizado para funcionar de manera estable y directa en GitHub Pages.";
+                } else {
+                    respuesta = `He procesado tu consulta: "${prompt}". Este funcionamiento dinámico local asegura que nunca se bloquee tu sitio ni se sature ninguna cuota, permitiendo que cualquier persona interactúe de forma fluida.`;
+                }
+
                 chat.messages[chat.messages.length - 1] = {
                     role: 'assistant',
-                    text: `Recibido con éxito: "${prompt}". Este es el flujo nativo limpio y directo que preferías.`
+                    text: respuesta
                 };
                 isProcessing = false;
                 saveStorage();
                 renderMessages();
-            }, 800);
+            }, 600);
         }
 
         window.onload = function() {
