@@ -88,8 +88,7 @@ function upd(){
   document.getElementById('lban').classList.toggle('hidden',s||mode.indexOf('local-')===0);
   document.getElementById('st').innerText=mode.indexOf('local-')===0?'Local':(s?'Nube':'Login');
 }
-/* FIN 6 */
-function togSb(o){document.getElementById('sb-m').classList.toggle('-translate-x-full',!o);}
+/* FIN 6 */function togSb(o){document.getElementById('sb-m').classList.toggle('-translate-x-full',!o);}
 function togTh(){var d=!document.documentElement.classList.contains('dark');document.documentElement.classList.toggle('dark',d);document.documentElement.classList.toggle('light',!d);document.getElementById('tlbl').innerText=d?'Oscuro':'Claro';setLS('nai9t',d?'dark':'light');}
 function openMod(){
   document.getElementById('msub').innerText=hw.blk?'Solo modelos en la nube.':'Local (sin login) o Nube (con login).';
@@ -103,7 +102,7 @@ function pick(id){mode=id;setLS('nai9m',mode);upd();closeMod();}
 function loginDir(cb){
   if(typeof puter==='undefined'||!puter.auth){addM('assistant','⚠️ Puter.js aún cargando o bloqueado.','Aviso');return;}
   document.getElementById('st').innerText='Login...';
-  puter.auth.signIn().then(function(){upd();if(cb)cb();}).catch(function(e){upd();var m=(e&&(e.message||e.error))||JSON.stringify(e);if(String(m).indexOf('closed')===-1)addM('assistant','⚠️ '+m,'Aviso');});
+  puter.auth.signIn({attempt_temp_user_creation:true}).then(function(){upd();if(cb)cb();}).catch(function(e){upd();var m=(e&&(e.message||e.error))||JSON.stringify(e);if(String(m).indexOf('closed')===-1)addM('assistant','⚠️ '+m,'Aviso');});
 }
 function authBtn(){if(isIn()){if(confirm('¿Cerrar sesión?')){puter.auth.signOut();upd();}}else loginDir();}
 /* FIN 7 */
